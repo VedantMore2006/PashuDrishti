@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cattle Classify — Demo</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 720px; margin: 40px auto; }
+    .box { padding: 12px; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.1); }
+    .result { white-space: pre-wrap; background: #f6f6f6; padding: 10px; margin-top: 12px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h2>Cattle Classification — Local Demo</h2>
+  <div class="box">
+    <label for="animalType">Select Animal Type:</label>
+    <select id="animalType">
+      <option value="cow">Cow</option>
+      <option value="buffalo">Buffalo</option>
+    </select>
+    <br><br>
+    <input id="fileInput" type="file" accept="image/*"><br><br>
+    <button onclick="upload()">Upload & Classify</button>
+    <div id="status" style="margin-top:10px;color:green"></div>
+    <div id="out" class="result"></div>
+  </div>
+
+  <script>
+    async function upload(){
+      document.getElementById('status').innerText = '';
+      document.getElementById('out').innerText = '';
+
+      let f = document.getElementById('fileInput').files[0];
+      let animal = document.getElementById('animalType').value;
+      if(!f){ alert('Choose an image first'); return; }
+
+      let fd = new FormData();
+      fd.append('file', f);
+      fd.append('animal', animal);
+
+      document.getElementById('status').innerText = 'Uploading...';
+
+      try {
+        let res = await fetch("http://127.0.0.1:5000/classify", {
+          method: 'POST',
+          body: fd
+        });
+
+        if (!res.ok) {
+          throw new Error("Server returned " + res.status);
+        }
+
+        let data = await res.json();
+        document.getElementById('out').innerText = JSON.stringify(data, null, 2);
+
+        document.getElementById('status').innerText = 'Done ✔️';
+
+      } catch (err) {
+        document.getElementById('status').innerText = 'Error: ' + err.message;
+      }
+    }
+  </script>
+</body>
+</html>
