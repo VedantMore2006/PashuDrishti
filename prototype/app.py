@@ -169,10 +169,14 @@ async def get_enhanced_details_from_gemini(breed_name: str, traits: str, nutriti
     Follow exactly this schema:
 
     {{
-    "ai_summary": "Write a 2–3 sentence, farmer-friendly summary of {breed_name}, including its origin, primary use (dairy/draught/dual), and one standout characteristic.",
-    "enhanced_traits": "Expand the Key Traits. Explain why each trait matters (disease resistance, climate tolerance, productivity, temperament, etc.).",
-    "improved_nutrition_plan": "Turn the nutrition info into a short actionable feeding plan. Include typical fodder names (green fodder, dry fodder, concentrates), mineral mix, seasonal adjustments, and daily water needs.",
-    "management_tip": "One highly practical, actionable tip specific to {breed_name} regarding housing, health care, or handling. Use plain language."
+    "ai_summary": "Write a 2–3 sentence, farmer-friendly summary of {breed_name}, 
+    including its origin, primary use (dairy/draught/dual), and one standout characteristic.",
+    "enhanced_traits": "Expand the Key Traits. 
+    Explain why each trait matters (disease resistance, climate tolerance, productivity, temperament, etc.).",
+    "improved_nutrition_plan": "Turn the nutrition info into a short actionable feeding plan. 
+    Include typical fodder names (green fodder, dry fodder, concentrates), mineral mix, seasonal adjustments, and daily water needs.",
+    "management_tip": "One highly practical, 
+    actionable tip specific to {breed_name} regarding housing, health care, or handling. Use plain language."
     }}
 
     Rules:
