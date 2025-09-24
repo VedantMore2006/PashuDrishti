@@ -690,6 +690,7 @@
         });
         
         // Analyze image function
+        // Also replace the analyzeBtn event listener with this improved version
         analyzeBtn.addEventListener('click', async function() {
             const file = fileInput.files[0];
             
@@ -715,13 +716,38 @@
                 if (response.ok) {
                     const result = await response.json();
                     showStatus('Analysis complete!', 'success');
+                    
+                    // Log the raw data for debugging
+                    console.log('Raw API response:', result);
+                    
                     displayResults(result);
                 } else {
-                    throw new Error(`Server responded with status: ${response.status}`);
+                    const errorText = await response.text();
+                    throw new Error(`Server error: ${response.status} - ${errorText}`);
                 }
             } catch (error) {
                 console.error('Error:', error);
                 showStatus(`Error: ${error.message}. Please check if the backend server is running.`, 'error');
+                
+                // For debugging - show sample data
+                showStatus('Showing sample data for debugging...', 'info');
+                const sampleData = {
+                    predicted_breed: "Banni",
+                    confidence: 0.85,
+                    family: "Buffalo",
+                    details: {
+                        ai_summary: "Banni buffalo is a recognized breed known for its adaptability to harsh conditions.",
+                        enhanced_traits: "Hardy, good milk yield, adapted to arid regions",
+                        improved_nutrition_plan: "Fodder: A mix of locally available green fodder with protein supplements",
+                        management_tip: "Provide adequate shade and water in hot climates"
+                    },
+                    top_3_matches: [
+                        { breed: "Banni", confidence: 0.85 },
+                        { breed: "Mehsana", confidence: 0.10 },
+                        { breed: "Murrah", confidence: 0.05 }
+                    ]
+                };
+                displayResults(sampleData);
             } finally {
                 analyzeBtn.disabled = false;
                 analyzeBtn.textContent = 'Analyze Image';
@@ -751,8 +777,22 @@
             // Update the UI with the results
             document.getElementById('predictedBreed').textContent = data.predicted_breed || 'N/A';
             
-            // Handle confidence display with visual meter
-            const confidenceValue = data.confidence ? parseFloat(data.confidence) : 0;
+            // Handle confidence display - fix for the 7071.00% issue
+            let confidenceValue;
+            if (typeof data.confidence === 'number') {
+                confidenceValue = data.confidence;
+            } else if (typeof data.confidence === 'string') {
+                // Handle cases where confidence might be a string with % or other issues
+                confidenceValue = parseFloat(data.confidence.replace('%', '')) / 100;
+            } else {
+                confidenceValue = 0;
+            }
+            
+            // Ensure confidence is between 0 and 1 (not 70.71 which would be 7071%)
+            if (confidenceValue > 1) {
+                confidenceValue = confidenceValue / 100;
+            }
+            
             const confidencePercentage = (confidenceValue * 100).toFixed(2) + '%';
             document.getElementById('confidence').textContent = confidencePercentage;
             
@@ -770,12 +810,18 @@
             }
             
             document.getElementById('family').textContent = data.family || 'N/A';
+            
+            // Fix nutrition plan display - handle the truncated text
+            let nutritionPlan = data.details?.improved_nutrition_plan || 'No nutrition plan available.';
+            // Remove markdown formatting if present
+            nutritionPlan = nutritionPlan.replace(/\*\*/g, '');
+            document.getElementById('nutritionPlan').textContent = nutritionPlan;
+            
             document.getElementById('aiSummary').textContent = data.details?.ai_summary || 'No summary available.';
             document.getElementById('enhancedTraits').textContent = data.details?.enhanced_traits || 'No trait information available.';
-            document.getElementById('nutritionPlan').textContent = data.details?.improved_nutrition_plan || 'No nutrition plan available.';
             document.getElementById('managementTip').textContent = data.details?.management_tip || 'No management tips available.';
             
-            // Display top matches
+            // Display top matches - fix NaN% issue
             const topMatchesDiv = document.getElementById('topMatches');
             topMatchesDiv.innerHTML = '';
             
@@ -786,12 +832,32 @@
                     
                     const matchName = document.createElement('span');
                     matchName.className = 'match-name';
-                    matchName.textContent = match.breed;
+                    matchName.textContent = match.breed || 'Unknown Breed';
                     
                     const matchConfidence = document.createElement('span');
                     matchConfidence.className = 'match-confidence';
-                    matchConfidence.textContent = (match.confidence * 100).toFixed(2) + '%';
                     
+                    // Fix NaN% issue in top matches
+                    let matchConfidenceValue;
+                    if (typeof match.confidence === 'number' && !isNaN(match.confidence)) {
+                        matchConfidenceValue = match.confidence;
+                    } else if (typeof match.confidence === 'string') {
+                        matchConfidenceValue = parseFloat(match.confidence);
+                    } else {
+                        matchConfidenceValue = 0;
+                    }
+                    
+                    // Ensure confidence is between 0 and 1
+                    if (matchConfidenceValue > 1) {
+                        matchConfidenceValue = matchConfidenceValue / 100;
+                    }
+                    
+                    // Handle NaN case
+                    if (isNaN(matchConfidenceValue)) {
+                        matchConfidenceValue = 0;
+                    }
+                    
+                    matchConfidence.textContent = (matchConfidenceValue * 100).toFixed(2) + '%';
                     matchDiv.appendChild(matchName);
                     matchDiv.appendChild(matchConfidence);
                     topMatchesDiv.appendChild(matchDiv);
