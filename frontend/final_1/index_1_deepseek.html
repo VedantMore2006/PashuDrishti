@@ -17,6 +17,10 @@
             --background-alt: #ffffff;
             --border: #e2e8f0;
             --shadow: rgba(0, 0, 0, 0.1);
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
         }
 
         .dark-mode {
@@ -30,13 +34,17 @@
             --background-alt: #2d3748;
             --border: #4a5568;
             --shadow: rgba(0, 0, 0, 0.25);
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --info: #60a5fa;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            transition: background-color 0.3s, color 0.3s;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
         }
 
         body {
@@ -72,10 +80,6 @@
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-
-        .logo img {
-            height: 40px;
         }
 
         .logo h1 {
@@ -116,6 +120,17 @@
             cursor: pointer;
             font-size: 1.2rem;
             color: var(--text);
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--border);
         }
 
         /* Hero Section */
@@ -164,11 +179,12 @@
             padding: 40px;
             margin: 20px 0;
             cursor: pointer;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
         }
 
         .upload-area:hover {
             border-color: var(--primary);
+            background-color: rgba(74, 142, 60, 0.05);
         }
 
         .upload-icon {
@@ -179,6 +195,7 @@
 
         .upload-text {
             margin-bottom: 20px;
+            color: var(--text-light);
         }
 
         .browse-btn {
@@ -257,6 +274,7 @@
             padding: 15px;
             border-radius: 8px;
             background-color: var(--background);
+            border-left: 4px solid var(--primary);
         }
 
         .section-title {
@@ -264,11 +282,41 @@
             color: var(--primary);
             margin-bottom: 10px;
             font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .match {
             margin-left: 20px;
             padding: 5px 0;
+            display: flex;
+            justify-content: space-between;
+            max-width: 300px;
+        }
+
+        .match-name {
+            font-weight: 500;
+        }
+
+        .match-confidence {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .confidence-meter {
+            height: 10px;
+            background-color: var(--border);
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background-color: var(--primary);
+            border-radius: 5px;
+            transition: width 0.5s ease-in-out;
         }
 
         .status-message {
@@ -280,21 +328,21 @@
         }
 
         .status-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(40, 167, 69, 0.3);
         }
 
         .status-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(220, 53, 69, 0.3);
         }
 
         .status-info {
-            background-color: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
+            background-color: rgba(23, 162, 184, 0.1);
+            color: var(--info);
+            border: 1px solid rgba(23, 162, 184, 0.3);
         }
 
         /* Features Section */
@@ -311,6 +359,12 @@
             padding: 25px;
             box-shadow: 0 3px 10px var(--shadow);
             text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px var(--shadow);
         }
 
         .feature-icon {
@@ -356,6 +410,7 @@
         .footer-links a {
             color: var(--text);
             text-decoration: none;
+            transition: color 0.3s;
         }
 
         .footer-links a:hover {
@@ -384,6 +439,11 @@
             .upload-area {
                 padding: 20px;
             }
+            
+            .match {
+                flex-direction: column;
+                gap: 5px;
+            }
         }
     </style>
 </head>
@@ -411,7 +471,7 @@
     <section class="hero">
         <div class="container">
             <h2>Advanced Cattle Health Analysis</h2>
-            <p>Upload images of your cattle for AI-powered health assessment and insights</p>
+            <p>Upload images of your cattle for AI-powered breed prediction and health insights</p>
         </div>
     </section>
 
@@ -440,36 +500,63 @@
             <div class="results-container" id="results-container">
                 <h3>Prediction Results</h3>
                 <div class="section">
-                    <div class="section-title">Predicted Breed:</div>
-                    <span id="predictedBreed"></span>
+                    <div class="section-title">
+                        <i class="fas fa-paw"></i>
+                        Predicted Breed:
+                    </div>
+                    <span id="predictedBreed">-</span>
                 </div>
                 <div class="section">
-                    <div class="section-title">Confidence:</div>
-                    <span id="confidence"></span>
+                    <div class="section-title">
+                        <i class="fas fa-chart-line"></i>
+                        Confidence Level:
+                    </div>
+                    <span id="confidence">-</span>
+                    <div class="confidence-meter">
+                        <div class="confidence-fill" id="confidenceFill"></div>
+                    </div>
                 </div>
                 <div class="section">
-                    <div class="section-title">Family:</div>
-                    <span id="family"></span>
+                    <div class="section-title">
+                        <i class="fas fa-users"></i>
+                        Family:
+                    </div>
+                    <span id="family">-</span>
                 </div>
                 <div class="section">
-                    <div class="section-title">Summary:</div>
-                    <p id="aiSummary"></p>
+                    <div class="section-title">
+                        <i class="fas fa-file-alt"></i>
+                        Summary:
+                    </div>
+                    <p id="aiSummary">No summary available.</p>
                 </div>
                 <div class="section">
-                    <div class="section-title">Traits:</div>
-                    <p id="enhancedTraits"></p>
+                    <div class="section-title">
+                        <i class="fas fa-list"></i>
+                        Traits:
+                    </div>
+                    <p id="enhancedTraits">No trait information available.</p>
                 </div>
                 <div class="section">
-                    <div class="section-title">Nutrition Plan:</div>
-                    <p id="nutritionPlan"></p>
+                    <div class="section-title">
+                        <i class="fas fa-utensils"></i>
+                        Nutrition Plan:
+                    </div>
+                    <p id="nutritionPlan">No nutrition plan available.</p>
                 </div>
                 <div class="section">
-                    <div class="section-title">Management Tip:</div>
-                    <p id="managementTip"></p>
+                    <div class="section-title">
+                        <i class="fas fa-tips"></i>
+                        Management Tip:
+                    </div>
+                    <p id="managementTip">No management tips available.</p>
                 </div>
                 <div class="section">
-                    <div class="section-title">Top 3 Matches:</div>
-                    <div id="topMatches"></div>
+                    <div class="section-title">
+                        <i class="fas fa-trophy"></i>
+                        Top 3 Matches:
+                    </div>
+                    <div id="topMatches">No match data available.</div>
                 </div>
             </div>
             
@@ -515,15 +602,25 @@
         const themeToggle = document.getElementById('theme-toggle');
         const themeIcon = themeToggle.querySelector('i');
         
+        // Check for saved theme preference or default to light mode
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+        }
+        
         themeToggle.addEventListener('click', () => {
             document.body.classList.toggle('dark-mode');
             
             if (document.body.classList.contains('dark-mode')) {
                 themeIcon.classList.remove('fa-moon');
                 themeIcon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
             } else {
                 themeIcon.classList.remove('fa-sun');
                 themeIcon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
             }
         });
         
@@ -624,7 +721,7 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showStatus(`Error: ${error.message}`, 'error');
+                showStatus(`Error: ${error.message}. Please check if the backend server is running.`, 'error');
             } finally {
                 analyzeBtn.disabled = false;
                 analyzeBtn.textContent = 'Analyze Image';
@@ -653,7 +750,25 @@
         function displayResults(data) {
             // Update the UI with the results
             document.getElementById('predictedBreed').textContent = data.predicted_breed || 'N/A';
-            document.getElementById('confidence').textContent = data.confidence ? `${(data.confidence * 100).toFixed(2)}%` : 'N/A';
+            
+            // Handle confidence display with visual meter
+            const confidenceValue = data.confidence ? parseFloat(data.confidence) : 0;
+            const confidencePercentage = (confidenceValue * 100).toFixed(2) + '%';
+            document.getElementById('confidence').textContent = confidencePercentage;
+            
+            // Update confidence meter
+            const confidenceFill = document.getElementById('confidenceFill');
+            confidenceFill.style.width = confidencePercentage;
+            
+            // Color code the confidence meter based on value
+            if (confidenceValue > 0.7) {
+                confidenceFill.style.backgroundColor = 'var(--success)';
+            } else if (confidenceValue > 0.4) {
+                confidenceFill.style.backgroundColor = 'var(--warning)';
+            } else {
+                confidenceFill.style.backgroundColor = 'var(--danger)';
+            }
+            
             document.getElementById('family').textContent = data.family || 'N/A';
             document.getElementById('aiSummary').textContent = data.details?.ai_summary || 'No summary available.';
             document.getElementById('enhancedTraits').textContent = data.details?.enhanced_traits || 'No trait information available.';
@@ -668,7 +783,17 @@
                 data.top_3_matches.forEach(match => {
                     const matchDiv = document.createElement('div');
                     matchDiv.className = 'match';
-                    matchDiv.textContent = `${match.breed}: ${(match.confidence * 100).toFixed(2)}%`;
+                    
+                    const matchName = document.createElement('span');
+                    matchName.className = 'match-name';
+                    matchName.textContent = match.breed;
+                    
+                    const matchConfidence = document.createElement('span');
+                    matchConfidence.className = 'match-confidence';
+                    matchConfidence.textContent = (match.confidence * 100).toFixed(2) + '%';
+                    
+                    matchDiv.appendChild(matchName);
+                    matchDiv.appendChild(matchConfidence);
                     topMatchesDiv.appendChild(matchDiv);
                 });
             } else {
@@ -677,7 +802,36 @@
             
             // Show the results container
             resultsContainer.style.display = 'block';
+            
+            // Scroll to results
+            resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
+        
+        // Demo function to show how the interface works without backend
+        function demoResults() {
+            const demoData = {
+                predicted_breed: "Holstein Friesian",
+                confidence: 0.87,
+                family: "Bos taurus",
+                details: {
+                    ai_summary: "Holstein Friesian is a dairy breed known for high milk production. This specimen appears healthy with good body condition.",
+                    enhanced_traits: "Large frame, distinct black and white markings, well-developed udder.",
+                    improved_nutrition_plan: "High-energy diet with balanced protein for optimal milk production. Include mineral supplements.",
+                    management_tip: "Regular health checks and proper milking hygiene are essential for this breed."
+                },
+                top_3_matches: [
+                    { breed: "Holstein Friesian", confidence: 0.87 },
+                    { breed: "Jersey", confidence: 0.09 },
+                    { breed: "Brown Swiss", confidence: 0.04 }
+                ]
+            };
+            
+            displayResults(demoData);
+            showStatus('Demo results loaded successfully!', 'success');
+        }
+        
+        // Uncomment the line below to enable demo mode (for testing without backend)
+        // demoResults();
     </script>
 </body>
 </html>
