@@ -16,12 +16,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 # Suppress minor warnings
+# Suppress non-critical UserWarning messages to keep logs clean during development/runtime.
 warnings.filterwarnings("ignore", category=UserWarning)
+
+# Load environment variables from a .env file (if present). This keeps secrets and
+# config out of source control. E.g., GOOGLE_API_KEY, ALLOW_WILDCARD_CORS, etc.
 load_dotenv()
 
 # ==============================================================================
 # 1. APP INITIALIZATION
 # ==============================================================================
+# Initialize the FastAPI application. Title/description/version are used by
+# the OpenAPI docs (available at /docs when the server is running).
 app = FastAPI(
     title="Pashu Drishti Breed Identification API 🐄 (AI Enhanced)",
     description="Upload an image of a bovine to classify its breed and get AI-powered insights.",
@@ -29,16 +35,26 @@ app = FastAPI(
 )
 
 # Mount static files so the app can serve assets if needed
+# Mount a static file directory so the app can serve images or other assets at
+# /static. This is optional but convenient for small frontend assets or testing.
 app.mount("/static", StaticFiles(directory="."), name="static")
 
 # CORS configuration with option to disable wildcard via environment variable
+# CORS (Cross-Origin Resource Sharing) configuration. By default the app
+# whitelists a few local development origins. For convenience during local
+# testing we allow a wildcard origin when ALLOW_WILDCARD_CORS is true. In
+# production you should set ALLOW_WILDCARD_CORS to false and list only the
+# trusted frontend origins.
 ALLOW_WILDCARD_CORS = os.getenv("ALLOW_WILDCARD_CORS", "true").lower() in ("1", "true", "yes")
 allowed_origins = [
+    # Example local development hosts; keep or modify these for your environment
     "http://192.168.68.119:7860",
     "http://localhost:7860",
     "http://localhost:8000",
 ]
 if ALLOW_WILDCARD_CORS:
+    # WARNING: allowing '*' opens your API to requests from any origin.
+    # Use for development only or when behind proper authentication proxies.
     allowed_origins.append("*")
 
 app.add_middleware(
@@ -52,13 +68,20 @@ app.add_middleware(
 # ==============================================================================
 # 2. MODEL AND METADATA SETUP
 # ==============================================================================
+# Model configuration: path to the saved PyTorch checkpoint and model type.
 MODEL_PATH = "best_model_final.pth"
 MODEL_NAME = "convnext_tiny"
 DROP_PATH_RATE = 0.2
+
+# Decide whether to use GPU (CUDA) or CPU based on availability. Using the
+# GPU will greatly speed up inference when available.
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using device: {DEVICE}")
 
 # Breed metadata (unchanged)
+# Breed metadata provides human-readable information for each class the
+# classifier can predict. This is not used during model inference; it is
+# returned to API users to provide helpful context and suggestions.
 breed_metadata_details = {
     "Alambadi": {"family": "Cattle", "traits": "Draught breed from Tamil Nadu, grey or dark grey coat, backward-curving horns, well-built and hardy", "nutrition": "Primarily for work, thrives on local grazing; avg. milk yield 1-2 L/day"},
     "Amritmahal": {"family": "Cattle", "traits": "Grey coat, long tapering head, long horns emerging close together, known for power and endurance", "nutrition": "Primarily a draught animal, requires high energy feed for work; low milk yield avg. 1-2 L/day"},
@@ -102,38 +125,63 @@ breed_metadata_details = {
     "Umblachery": {"family": "Cattle", "traits": "Grey with white markings on face and legs, small outwardly curved horns, known for being swift", "nutrition": "Excellent draught breed for wetlands and farms in Tamil Nadu; avg. milk yield 1-3 L/day"},
     "Vechur": {"family": "Cattle", "traits": "Smallest cattle breed, light red, black or fawn and white coat, small thin horns", "nutrition": "Produces large amount of milk for its small size and feed intake; avg. milk yield 2-3 L/day"}
 }
+# Prepare sorted class list and number of classes. Sorting ensures consistent
+# ordering across runs; NUM_CLASSES is required when constructing the model.
 classes = sorted(list(breed_metadata_details.keys()))
 NUM_CLASSES = len(classes)
 
-# Load PyTorch model
+# -------------------------------
+# Load the PyTorch model
+# -------------------------------
 try:
+    # Validate the model file exists before attempting to load it.
     if not os.path.exists(MODEL_PATH):
         raise FileNotFoundError(f"Model file not found at {MODEL_PATH}.")
+
+    # Create the model architecture (not pretrained weights), matching the
+    # number of classes used during training.
     model = timm.create_model(MODEL_NAME, pretrained=False, num_classes=NUM_CLASSES, drop_path_rate=DROP_PATH_RATE)
+
+    # Load checkpoint and extract state dict. Some checkpoints are saved as a
+    # dict with a 'model_state_dict' key, others are plain state_dict objects.
     checkpoint = torch.load(MODEL_PATH, map_location=DEVICE)
     state_dict = checkpoint.get('model_state_dict', checkpoint)
+
+    # Load weights into the model and set evaluation mode.
     model.load_state_dict(state_dict)
     model.eval()
     model.to(DEVICE)
     print(f"✅ PyTorch Model '{MODEL_NAME}' loaded successfully from {MODEL_PATH}")
 except Exception as e:
+    # Use exception chaining to preserve the original traceback for easier debugging.
     raise RuntimeError(f"Could not load PyTorch model: {e}") from e
 
-# Generative AI configuration
+# -------------------------------
+# Configure Gemini (Generative AI)
+# -------------------------------
 try:
+    # Read the API key from environment. It's intentionally required here so
+    # the app can optionally provide richer AI-enhanced responses when set.
     GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
     if not GOOGLE_API_KEY:
         raise ValueError("GOOGLE_API_KEY environment variable not set.")
+
+    # Configure the google-generativeai client and create a model handle.
     genai.configure(api_key=GOOGLE_API_KEY)
     gemini_model = genai.GenerativeModel('gemini-1.5-flash')
     print("✅ Gemini AI model configured successfully.")
 except Exception as e:
+    # If Gemini is not configured (missing key or network issue) we keep
+    # running but disable AI enhancements; the rest of the API remains usable.
     print(f"⚠️ WARNING: Gemini AI model could not be configured. AI-enhanced details will be disabled. Error: {e}")
     gemini_model = None
 
 # ==============================================================================
 # 3. HELPER FUNCTIONS
 # ==============================================================================
+# Image preprocessing pipeline. Matches the transforms typically used during
+# model training: resize to 224x224, convert to tensor, and normalize using
+# ImageNet statistics (commonly used base normalization for transfer learning).
 preprocess_transform = T.Compose([
     T.Resize((224, 224)),
     T.ToTensor(),
@@ -142,18 +190,42 @@ preprocess_transform = T.Compose([
 
 
 def preprocess_image(image_bytes):
+    """Convert raw image bytes into a normalized PyTorch tensor batch.
+
+    Steps:
+    - Open image from bytes with PIL and convert to RGB (3 channels)
+    - Apply the preprocessing pipeline defined above
+    - Add a batch dimension (unsqueeze) since models expect batched inputs
+
+    On failure this raises an HTTPException with a 400 status so the API
+    returns a client-friendly error message.
+    """
     try:
         img = Image.open(BytesIO(image_bytes)).convert("RGB")
         img_tensor = preprocess_transform(img)
+        # Unsqueeze to create shape (1, C, H, W) for a single image batch.
         return img_tensor.unsqueeze(0)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error processing image: {e}")
 
 
 async def get_enhanced_details_from_gemini(breed_name: str, traits: str, nutrition: str):
-    if not gemini_model:
-        return None  # Return None if Gemini is not configured
+    """Call Gemini to generate an enhanced, structured JSON for a breed.
 
+    This function constructs a strict prompt that instructs the model to
+    return only a valid JSON object following a fixed schema. This reduces
+    parsing errors and makes downstream handling deterministic.
+
+    If Gemini is not configured (gemini_model is None) the function returns
+    None so the caller can use fallback data.
+    """
+    # Return immediately if the Gemini client is not available.
+    if not gemini_model:
+        return None
+
+    # Strict prompt asking the model to emit only a JSON object following
+    # the exact schema. This makes parsing safe as long as the model respects
+    # the instruction (we still guard against JSON errors below).
     prompt = f"""
     You are an expert veterinarian and livestock management consultant. 
     A farmer has uploaded a photo of a bovine. The system has classified it as the breed "{breed_name}" 
@@ -185,10 +257,17 @@ async def get_enhanced_details_from_gemini(breed_name: str, traits: str, nutriti
     """
 
     try:
+        # Asynchronously request content from the Gemini model.
         response = await gemini_model.generate_content_async(prompt)
+
+        # Clean code fences or surrounding markdown (sometimes models include them)
         cleaned_response = response.text.strip().replace("```json", "").replace("```", "").strip()
+
+        # Parse the response as JSON and return the structured object.
         return json.loads(cleaned_response)
     except Exception as e:
+        # If the call fails or returns invalid JSON, log and return None so the
+        # API can fall back to non-AI details.
         print(f"Error calling Gemini API: {e}")
         return None
 
@@ -198,36 +277,60 @@ async def get_enhanced_details_from_gemini(breed_name: str, traits: str, nutriti
 
 @app.get("/")
 async def read_root():
+    """Health-check endpoint. Returns a small JSON stating the API is running.
+
+    Useful for load balancers, monitoring, or quick local checks.
+    """
     return {"status": "ok", "message": "Bovine Breed Identification API is running."}
 
 
 @app.post("/predict")
 async def predict_breed(file: UploadFile = File(...)):
+    """Primary prediction endpoint.
+
+    Accepts a file upload (multipart/form-data). Steps:
+    1. Read uploaded image bytes
+    2. Preprocess into a tensor and move to DEVICE (CPU/GPU)
+    3. Run a forward pass through the model inside torch.no_grad()
+    4. Softmax the outputs to probabilities and pick the top-3 classes
+    5. Optionally call Gemini to enrich the result with farmer-friendly advice
+    6. Return a structured JSON response with predicted breed, confidence,
+       family, detailed advice, and top-3 matches
+    """
     try:
+        # Read raw bytes from the uploaded file object asynchronously.
         image_bytes = await file.read()
+
+        # Preprocess the raw image bytes into a batched tensor and send to DEVICE
         image_tensor = preprocess_image(image_bytes).to(DEVICE)
 
+        # Run inference without computing gradients (faster & uses less memory)
         with torch.no_grad():
             outputs = model(image_tensor)
+            # Convert logits to probabilities
             probabilities = F.softmax(outputs, dim=1)
         
+        # Convert to a 1D numpy array (single example batch) for post-processing
         prediction_vector = probabilities.cpu().numpy()[0]
 
+        # Get indices of top-3 predictions (sorted highest-first)
         top_indices = np.argsort(prediction_vector)[-3:][::-1]
         
+        # Primary predicted class index and associated metadata
         main_breed_index = top_indices[0]
         main_breed_name = classes[main_breed_index]
         main_breed_confidence = float(prediction_vector[main_breed_index] * 100)
         main_breed_info = breed_metadata_details.get(main_breed_name, {})
 
         # --- AI-Powered Enhancement ---
+        # Ask Gemini to provide farmer-friendly details following the strict JSON schema.
         enhanced_details = await get_enhanced_details_from_gemini(
             breed_name=main_breed_name,
             traits=main_breed_info.get("traits", "N/A"),
             nutrition=main_breed_info.get("nutrition", "N/A")
         )
 
-        # If the AI call fails or is disabled, use the original basic details
+        # Fallback if Gemini is not available or returned invalid output
         if not enhanced_details:
             enhanced_details = {
                 "ai_summary": "AI enhancement is currently unavailable.",
@@ -237,6 +340,7 @@ async def predict_breed(file: UploadFile = File(...)):
             }
         # --- End AI Enhancement ---
 
+        # Construct the JSON response expected by clients (frontend or API users)
         response = {
             "predicted_breed": main_breed_name,
             "confidence": f"{main_breed_confidence:.2f}%",
@@ -252,6 +356,7 @@ async def predict_breed(file: UploadFile = File(...)):
         }
         return response
     except Exception as e:
+        # Return a 500 error with a helpful message for debugging client-side.
         raise HTTPException(status_code=500, detail=f"Prediction error: {e}")
 
 # ==============================================================================
