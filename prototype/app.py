@@ -1,73 +1,56 @@
 import os
 import warnings
-from fastapi.middleware.cors import CORSMiddleware
+import json
+import requests
 from io import BytesIO
 from PIL import Image
-import json
 from dotenv import load_dotenv
-# --- AI Model Imports ---
 import google.generativeai as genai
-# --- PyTorch Imports ---
 import torch
 import timm
 import torchvision.transforms as T
 import torch.nn.functional as F
-# --- End Imports ---
-
 import numpy as np
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form
+from fastapi.middleware.cors import CORSMiddleware
 
 # Suppress minor warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 load_dotenv()
+
 # ==============================================================================
 # 1. APP INITIALIZATION
 # ==============================================================================
 app = FastAPI(
-    title="Pashu Drishti Breed Identification API 🐄 (AI Enhanced)",
-    description="Upload an image of a bovine to classify its breed and get AI-powered insights.",
-    version="2.0.0 (PyTorch + Gemini)"
+    title="Pashu Drishti Breed Identification API",
+    description="API to classify bovine breeds from images with AI-enhanced insights.",
+    version="2.0.0"
 )
-origins = [
-    "http://localhost:8000",  # if serving frontend locally
-    "http://192.168.68.114",  # if accessing frontend via IP
-    "*"  # <- allow all origins (for testing only)
-]
 
+# CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # Use ["*"] for open testing
+    allow_origins=[
+        "http://192.168.68.119:7860",
+        "http://localhost:7860",
+        "http://localhost:8000",
+        "*"  # Remove in production
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # ==============================================================================
-# 2. LOAD MODELS & METADATA
+# 2. MODEL AND METADATA SETUP
 # ==============================================================================
-
-# --- Computer Vision Model & Device Configuration ---
 MODEL_PATH = "best_model_final.pth"
 MODEL_NAME = "convnext_tiny"
 DROP_PATH_RATE = 0.2
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using device: {DEVICE}")
 
-# --- Generative AI Model Configuration ---
-try:
-    # Best practice: Use an environment variable for the API key
-    GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
-    if not GOOGLE_API_KEY:
-        raise ValueError("GOOGLE_API_KEY environment variable not set.")
-    genai.configure(api_key=GOOGLE_API_KEY)
-    gemini_model = genai.GenerativeModel('gemini-1.5-flash')
-    print("✅ Gemini AI model configured successfully.")
-except Exception as e:
-    print(f"⚠️ WARNING: Gemini AI model could not be configured. AI-enhanced details will be disabled. Error: {e}")
-    gemini_model = None
-# --- End Configuration ---
-
-# This metadata is for displaying detailed results, NOT for model input.
+# Breed metadata
 breed_metadata_details = {
     "Alambadi": {"family": "Cattle", "traits": "Draught breed from Tamil Nadu, grey or dark grey coat, backward-curving horns, well-built and hardy", "nutrition": "Primarily for work, thrives on local grazing; avg. milk yield 1-2 L/day"},
     "Amritmahal": {"family": "Cattle", "traits": "Grey coat, long tapering head, long horns emerging close together, known for power and endurance", "nutrition": "Primarily a draught animal, requires high energy feed for work; low milk yield avg. 1-2 L/day"},
@@ -114,29 +97,35 @@ breed_metadata_details = {
 classes = sorted(list(breed_metadata_details.keys()))
 NUM_CLASSES = len(classes)
 
-# --- PyTorch Model Loading ---
+# Load PyTorch model
 try:
     if not os.path.exists(MODEL_PATH):
-        raise FileNotFoundError(f"Model file not found at {MODEL_PATH}.")
-    
+        raise FileNotFoundError(f"Model file not found at {MODEL_PATH}")
     model = timm.create_model(MODEL_NAME, pretrained=False, num_classes=NUM_CLASSES, drop_path_rate=DROP_PATH_RATE)
     checkpoint = torch.load(MODEL_PATH, map_location=DEVICE)
-    
     state_dict = checkpoint.get('model_state_dict', checkpoint)
     model.load_state_dict(state_dict)
     model.eval()
     model.to(DEVICE)
-    
-    print(f"✅ PyTorch Model '{MODEL_NAME}' loaded successfully from {MODEL_PATH}")
-
+    print(f"✅ Loaded model '{MODEL_NAME}' from {MODEL_PATH}")
 except Exception as e:
-    raise RuntimeError(f"Could not load PyTorch model: {e}") from e
+    raise RuntimeError(f"Failed to load model: {e}")
+
+# Gemini AI configuration
+try:
+    GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+    if not GOOGLE_API_KEY:
+        raise ValueError("GOOGLE_API_KEY not set")
+    genai.configure(api_key=GOOGLE_API_KEY)
+    gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+    print("✅ Gemini AI configured")
+except Exception as e:
+    print(f"⚠️ Gemini AI configuration failed: {e}")
+    gemini_model = None
 
 # ==============================================================================
 # 3. HELPER FUNCTIONS
 # ==============================================================================
-
-# --- Image Preprocessing ---
 preprocess_transform = T.Compose([
     T.Resize((224, 224)),
     T.ToTensor(),
@@ -149,108 +138,95 @@ def preprocess_image(image_bytes):
         img_tensor = preprocess_transform(img)
         return img_tensor.unsqueeze(0)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error processing image: {e}")
+        raise HTTPException(status_code=400, detail=f"Image processing error: {e}")
 
-# --- AI Enhancement Function ---
-async def get_enhanced_details_from_gemini(breed_name: str, traits: str, nutrition: str):
+def fetch_image_from_url(url: str):
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        return response.content
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to fetch image from URL: {e}")
+
+async def enhance_with_gemini(breed_name: str, traits: str, nutrition: str):
     if not gemini_model:
-        return None  # Return None if Gemini is not configured
-
+        return None
     prompt = f"""
-    You are an expert veterinarian and livestock management consultant. 
-    A farmer has uploaded a photo of a bovine. The system has classified it as the breed "{breed_name}" 
-    with the following baseline information:
-
-    - Key Traits: "{traits}"
-    - Nutrition Info: "{nutrition}"
-
-    Your task:
-    Return ONLY a **valid JSON object** with no commentary, code blocks, or explanations. 
-    Follow exactly this schema:
-
+    You are a veterinarian and livestock expert. 
+    A farmer uploaded a bovine image classified as "{breed_name}" with:
+    - Traits: "{traits}"
+    - Nutrition: "{nutrition}"
+    
+    Return a valid JSON object:
     {{
-    "ai_summary": "Write a 2–3 sentence, farmer-friendly summary of {breed_name}, 
-    including its origin, primary use (dairy/draught/dual), and one standout characteristic.",
-    "enhanced_traits": "Expand the Key Traits. 
-    Explain why each trait matters (disease resistance, climate tolerance, productivity, temperament, etc.).",
-    "improved_nutrition_plan": "Turn the nutrition info into a short actionable feeding plan. 
-    Include typical fodder names (green fodder, dry fodder, concentrates), mineral mix, seasonal adjustments, and daily water needs.",
-    "management_tip": "One highly practical, 
-    actionable tip specific to {breed_name} regarding housing, health care, or handling. Use plain language."
+        "ai_summary": "2-3 sentence summary of {breed_name}, covering origin, primary use (dairy/draught/dual), and one key trait.",
+        "enhanced_traits": "Expand on traits, explaining their significance (e.g., disease resistance, productivity).",
+        "improved_nutrition_plan": "Actionable feeding plan with fodder types, mineral mix, seasonal adjustments, and water needs.",
+        "management_tip": "One practical tip for {breed_name} on housing, health, or handling."
     }}
-
-    Rules:
-    - Be concise but rich with information.
-    - Avoid repetition of breed name in every sentence.
-    - Use common Indian farming terms where possible (e.g., ‘napier grass’, ‘mustard cake’, ‘chaffed fodder’).
-    - Keep output valid JSON only.
+    Use concise, farmer-friendly language and Indian farming terms (e.g., napier grass, mustard cake).
     """
-
     try:
         response = await gemini_model.generate_content_async(prompt)
-        cleaned_response = response.text.strip().replace("```json", "").replace("```", "").strip()
+        cleaned_response = response.text.strip().replace("```json", "").replace("```", "")
         return json.loads(cleaned_response)
     except Exception as e:
-        print(f"Error calling Gemini API: {e}")
+        print(f"Gemini API error: {e}")
         return None
 
 # ==============================================================================
 # 4. API ENDPOINTS
 # ==============================================================================
 @app.get("/")
-def read_root():
-    return {"status": "ok", "message": "Bovine Breed Identification API is running."}
+async def root():
+    return {"status": "ok", "message": "Bovine Breed Identification API running"}
 
 @app.post("/predict")
-async def predict_breed(file: UploadFile = File(...)):
+async def predict_breed(file: UploadFile = File(None), url: str = Form(None)):
     try:
-        image_bytes = await file.read()
+        if file and url:
+            raise HTTPException(status_code=400, detail="Provide either a file or URL, not both")
+        if not file and not url:
+            raise HTTPException(status_code=400, detail="File or URL required")
+
+        # Get image bytes
+        image_bytes = await file.read() if file else fetch_image_from_url(url)
         image_tensor = preprocess_image(image_bytes).to(DEVICE)
 
+        # Model inference
         with torch.no_grad():
             outputs = model(image_tensor)
             probabilities = F.softmax(outputs, dim=1)
         
         prediction_vector = probabilities.cpu().numpy()[0]
-
         top_indices = np.argsort(prediction_vector)[-3:][::-1]
-        
         main_breed_index = top_indices[0]
         main_breed_name = classes[main_breed_index]
         main_breed_confidence = float(prediction_vector[main_breed_index] * 100)
         main_breed_info = breed_metadata_details.get(main_breed_name, {})
 
-        # --- AI-Powered Enhancement ---
-        enhanced_details = await get_enhanced_details_from_gemini(
+        # Gemini enhancement
+        enhanced_details = await enhance_with_gemini(
             breed_name=main_breed_name,
             traits=main_breed_info.get("traits", "N/A"),
             nutrition=main_breed_info.get("nutrition", "N/A")
-        )
+        ) or {
+            "ai_summary": "AI enhancement unavailable",
+            "enhanced_traits": main_breed_info.get("traits", "N/A"),
+            "improved_nutrition_plan": main_breed_info.get("nutrition", "N/A"),
+            "management_tip": "N/A"
+        }
 
-        # If the AI call fails or is disabled, use the original basic details
-        if not enhanced_details:
-            enhanced_details = {
-                "ai_summary": "AI enhancement is currently unavailable.",
-                "enhanced_traits": main_breed_info.get("traits", "N/A"),
-                "improved_nutrition_plan": main_breed_info.get("nutrition", "N/A"),
-                "management_tip": "N/A"
-            }
-        # --- End AI Enhancement ---
-
-        response = {
+        return {
             "predicted_breed": main_breed_name,
             "confidence": f"{main_breed_confidence:.2f}%",
             "family": main_breed_info.get("family", "N/A"),
             "details": enhanced_details,
             "top_3_matches": [
-                {
-                    "breed": classes[i], 
-                    "confidence": f"{float(prediction_vector[i] * 100):.2f}%"
-                }
+                {"breed": classes[i], "confidence": f"{float(prediction_vector[i] * 100):.2f}%"}
                 for i in top_indices
             ]
         }
-        return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction error: {e}")
 
