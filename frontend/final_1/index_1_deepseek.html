@@ -71,9 +71,10 @@
 
         nav {
             display: flex;
-            justify-content: space-between;
             align-items: center;
             padding: 15px 0;
+            width: 100%;
+        }
         }
 
         .logo {
@@ -90,6 +91,8 @@
         .nav-links {
             display: flex;
             gap: 30px;
+            margin-left: auto;
+            justify-content: flex-end;
         }
 
         .nav-links a {
@@ -451,11 +454,9 @@
     <header>
         <div class="container">
             <nav>
-                <div class="logo">
-                    <i class="fas fa-cow" style="font-size: 2rem; color: var(--primary);"></i>
-                    <h1>Pashu Dhrishti</h1>
-                </div>
-                <div class="nav-links">
+                <h1 style="margin: 0; color: var(--primary); font-size: 2rem; text-align: left; flex: 1;">Pashu Dhrishti</h1>
+                <div style="flex: 1;"></div>
+                <div class="nav-links" style="margin-left: auto;">
                     <a href="#">Home</a>
                     <a href="#">How It Works</a>
                     <a href="#">About Us</a>
@@ -470,7 +471,7 @@
 
     <section class="hero">
         <div class="container">
-            <h2>Advanced Cattle Health Analysis</h2>
+            <h2>Cattle and Breed Classification</h2>
             <p>Upload images of your cattle for AI-powered breed prediction and health insights</p>
         </div>
     </section>
