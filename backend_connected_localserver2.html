@@ -41,7 +41,7 @@
       document.getElementById('status').innerText = 'Uploading...';
 
       try {
-        let res = await fetch("http://127.0.0.1:5000/classify", {
+        let res = await fetch("http://192.168.68.111:7860/predict", {
           method: 'POST',
           body: fd
         });
