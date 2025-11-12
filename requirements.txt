@@ -7,3 +7,4 @@ torch
 timm
 torchvision
 numpy
+python-multipart
