@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pashu Drishti - AI Cattle Analysis</title>
     
+    <!-- Tailwind: ensure class-based dark mode BEFORE loading CDN -->
+    <script>
+        // configure Tailwind to use the "class" strategy for dark mode
+        window.tailwind = window.tailwind || {};
+        tailwind.config = { darkMode: 'class' };
+    </script>
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -27,32 +34,43 @@
     </script>
 
     <style>
-        /* Custom styles for the page */
+        /* ============================================
+           LIGHT MODE CSS (Default)
+           ============================================ */
+        
         body {
             font-family: 'Inter', sans-serif;
-            /* Subtle gradient background */
             background-image: linear-gradient(to bottom right, #FBFBF8, #F0F2EB);
-        }
-        
-        .dark body {
-            background-image: linear-gradient(to bottom right, #111827, #0d1117);
+            color: #2E4F4F;
         }
 
-        /* Glassmorphism Card Style */
+        /* Glassmorphism Card Style - Light Mode */
         .glass-card, .header-glass {
-            backdrop-filter: blur(12px); /* The "glass" effect */
+            backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border-radius: 16px; /* 1rem, as requested */
+            border-radius: 16px;
         }
 
-        /* Sticky Header Glass Style */
         .header-glass {
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border-radius: 0; /* Header doesn't need rounded corners */
+            border-radius: 0;
+            background-color: rgba(255, 255, 255, 0.4);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        /* Navigation Link Style */
+        .glass-card {
+            background-color: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Navigation Link Style - Light Mode */
+        .nav-link {
+            color: #374151;
+            position: relative;
+        }
+
         .nav-link:after {
             content: '';
             position: absolute;
@@ -60,66 +78,230 @@
             left: 0;
             width: 0;
             height: 2px;
-            background-color: #2E4F4F; /* Light mode */
+            background-color: #2E4F4F;
             transition: width 0.3s;
         }
-        .dark .nav-link:after {
-            background-color: #6EE7B7; /* dark:bg-green-300 */
+
+        .nav-link:hover {
+            color: #1F2937;
         }
+
         .nav-link:hover:after {
             width: 100%;
         }
 
-        /* Custom Spinner */
+        /* Spinner - Light Mode */
         .spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #166534;
             border-radius: 50%;
             width: 48px;
             height: 48px;
             animation: spin 1s linear infinite;
         }
-        .dark .spinner {
-            border-color: #374151; /* dark:border-gray-700 */
+
+        /* Message Box - Light Mode */
+        #message-box {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            background-color: #F3F4F6;
+            color: #111827;
         }
+
+        /* Buttons - Light Mode */
+        .btn-primary {
+            background: linear-gradient(to right, #16a34a, #84cc16);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to right, #15803d, #65a30d);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid #15803d;
+            color: #15803d;
+        }
+
+        .btn-outline:hover {
+            background-color: #15803d;
+            color: white;
+        }
+
+        /* Upload Area - Light Mode */
+        .upload-area-border {
+            border-color: #9CA3AF;
+        }
+
+        .upload-area-border:hover {
+            border-color: #16a34a;
+            background-color: rgba(220, 252, 231, 0.5);
+        }
+
+        /* Result Pills - Light Mode */
+        .pill {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        /* ============================================
+           DARK MODE CSS (Applied when .dark class on html)
+           ============================================ */
+        
+        .dark body {
+            background-image: linear-gradient(to bottom right, #111827, #0d1117);
+            color: #D1D5DB;
+        }
+
+        /* Glassmorphism Card Style - Dark Mode */
+        .dark .header-glass {
+            background-color: rgba(17, 24, 39, 0.4);
+            border-bottom-color: rgba(55, 65, 81, 0.5);
+        }
+
+        .dark .glass-card {
+            background-color: rgba(31, 41, 55, 0.3);
+            border-color: rgba(55, 65, 81, 0.5);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Navigation Link Style - Dark Mode */
+        .dark .nav-link {
+            color: #D1D5DB;
+        }
+
+        .dark .nav-link:after {
+            background-color: #6EE7B7;
+        }
+
+        .dark .nav-link:hover {
+            color: #FFFFFF;
+        }
+
+        /* Spinner - Dark Mode */
+        .dark .spinner {
+            border-color: #374151;
+            border-left-color: #6EE7B7;
+        }
+
+        /* Message Box - Dark Mode */
+        .dark #message-box {
+            background-color: #1F2937;
+            color: #F3F4F6;
+        }
+
+        /* Buttons - Dark Mode */
+        .dark .btn-primary {
+            background: linear-gradient(to right, #22c55e, #84cc16);
+        }
+
+        .dark .btn-primary:hover {
+            background: linear-gradient(to right, #16a34a, #65a30d);
+        }
+
+        .dark .btn-outline {
+            border-color: #22c55e;
+            color: #6EE7B7;
+        }
+
+        .dark .btn-outline:hover {
+            background-color: #22c55e;
+            color: white;
+        }
+
+        /* Upload Area - Dark Mode */
+        .dark .upload-area-border {
+            border-color: #4B5563;
+        }
+
+        .dark .upload-area-border:hover {
+            border-color: #22c55e;
+            background-color: rgba(6, 78, 59, 0.2);
+        }
+
+        /* Result Pills - Dark Mode */
+        .dark .pill {
+            background-color: #064e3b;
+            color: #6EE7B7;
+        }
+
+        /* Text Colors - Dark Mode */
+        .dark h1,
+        .dark h2,
+        .dark h3,
+        .dark h4,
+        .dark .font-bold {
+            color: #F9FAFB;
+        }
+
+        .dark p,
+        .dark span,
+        .dark li {
+            color: #D1D5DB;
+        }
+
+        .dark .text-gray-500 {
+            color: #9CA3AF !important;
+        }
+
+        .dark .text-gray-600 {
+            color: #9CA3AF !important;
+        }
+
+        .dark .text-gray-700 {
+            color: #D1D5DB !important;
+        }
+
+        .dark .text-gray-800 {
+            color: #F3F4F6 !important;
+        }
+
+        .dark .text-gray-900 {
+            color: #F9FAFB !important;
+        }
+
+        /* ============================================
+           SHARED STYLES (Both Modes)
+           ============================================ */
 
         @keyframes spin {
             to {
                 transform: rotate(360deg);
             }
         }
-        
-        /* Message Box Style */
-        #message-box {
-            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+
+        /* Smooth transitions */
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
     </style>
 </head>
-<body class="antialiased transition-colors duration-300 bg-[#FBFBF8] dark:bg-gray-900 text-[#2E4F4F] dark:text-gray-300">
+<body class="antialiased">
 
     <!-- Header -->
-    <header class="sticky top-0 z-50 w-full header-glass bg-white/40 border-b border-white/20 dark:bg-gray-900/40 dark:border-gray-700/50">
+    <header class="sticky top-0 z-50 w-full header-glass">
         <nav class="px-4 sm:px-6 lg:px-8 flex items-center h-20">
             <!-- Logo / App Name -->
             <a href="#" class="flex items-center space-x-2 mr-auto">
                 <i class="fas fa-cow text-2xl text-green-800 dark:text-green-500"></i>
-                <span class="text-2xl font-bold text-gray-800 dark:text-gray-100">Pashu Drishti</span>
+                <span class="text-2xl font-bold">Pashu Drishti</span>
             </a>
 
             <!-- Desktop Navigation -->
             <div class="hidden md:flex items-center space-x-8">
-                <a href="#" class="nav-link relative font-medium transition-colors duration-300 dark:hover:text-white text-gray-700 dark:text-gray-300">Home</a>
-                <a href="#how-it-works" class="nav-link relative font-medium transition-colors duration-300 dark:hover:text-white text-gray-700 dark:text-gray-300">How It Works</a>
-                <a href="#about" class="nav-link relative font-medium transition-colors duration-300 dark:hover:text-white text-gray-700 dark:text-gray-300">About</a>
-                <button class="btn-primary bg-gradient-to-r from-green-600 to-lime-500 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transform transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 hover:from-green-700 hover:to-lime-600 dark:from-green-500 dark:to-lime-400 dark:hover:from-green-600 dark:hover:to-lime-500 !py-2 !px-5 !rounded-lg">Try Demo</button>
+                <a href="#" class="nav-link font-medium">Home</a>
+                <a href="#how-it-works" class="nav-link font-medium">How It Works</a>
+                <a href="#about" class="nav-link font-medium">About</a>
+                <button class="btn-primary font-semibold py-2 px-5 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5">Try Demo</button>
                 <!-- Dark Mode Toggle (Desktop) -->
-                <button id="theme-toggle-desktop" class="text-2xl text-gray-700 dark:text-gray-300 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                    <i class="fas fa-moon"></i> <!-- Icon will be changed by JS -->
+                <button id="theme-toggle-desktop" class="text-2xl w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-moon"></i>
                 </button>
             </div>
 
             <!-- Mobile Menu Button -->
             <div class="md:hidden">
-                <button id="hamburger-btn" class="text-2xl text-gray-800 dark:text-gray-200">
+                <button id="hamburger-btn" class="text-2xl">
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
@@ -127,14 +309,14 @@
         
         <!-- Mobile Menu (Hidden by default) -->
         <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-gray-800 shadow-xl">
-            <a href="#" class="block px-6 py-3 text-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Home</a>
-            <a href="#how-it-works" class="block px-6 py-3 text-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">How It Works</a>
-            <a href="#about" class="block px-6 py-3 text-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">About</a>
+            <a href="#" class="block px-6 py-3 text-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700">Home</a>
+            <a href="#how-it-works" class="block px-6 py-3 text-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700">How It Works</a>
+            <a href="#about" class="block px-6 py-3 text-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700">About</a>
             <div class="p-4 flex justify-between items-center space-x-4">
-                <button class="btn-primary bg-gradient-to-r from-green-600 to-lime-500 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transform transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 hover:from-green-700 hover:to-lime-600 dark:from-green-500 dark:to-lime-400 dark:hover:from-green-600 dark:hover:to-lime-500 w-full">Try Demo</button>
+                <button class="btn-primary font-semibold py-3 px-6 rounded-xl shadow-lg transform transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 w-full">Try Demo</button>
                 <!-- Dark Mode Toggle (Mobile) -->
-                <button id="theme-toggle-mobile" class="text-2xl text-gray-700 dark:text-gray-300 w-12 h-12 flex-shrink-0 rounded-lg flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                    <i class="fas fa-moon"></i> <!-- Icon will be changed by JS -->
+                <button id="theme-toggle-mobile" class="text-2xl w-12 h-12 flex-shrink-0 rounded-lg flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-moon"></i>
                 </button>
             </div>
         </div>
@@ -148,23 +330,23 @@
                 
                 <!-- Left Column (Content & Uploader) -->
                 <div class="md:col-span-3">
-                    <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight">
+                    <h1 class="text-4xl md:text-6xl font-extrabold leading-tight">
                         AI-Powered Cattle
                         <span class="text-green-700 dark:text-green-400">Health & Breed</span>
                         Identification
                     </h1>
-                    <p class="mt-6 text-lg text-gray-600 dark:text-gray-400 max-w-2xl">
+                    <p class="mt-6 text-lg max-w-2xl">
                         Our advanced AI analyzes images of your cattle to instantly identify breeds, check for visual health indicators, and provide actionable insights. Built for the modern farmer.
                     </p>
 
                     <!-- Uploader Card -->
                     <div id="upload-card" class="mt-10">
-                        <label for="file-upload" class="relative block w-full border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-2xl p-10 text-center cursor-pointer hover:border-green-600 dark:hover:border-green-500 hover:bg-green-50/50 dark:hover:bg-green-900/20 transition-all duration-300">
+                        <label id="upload-label" for="file-upload" class="upload-area-border relative block w-full border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all duration-300">
                             <input id="file-upload" type="file" class="sr-only" accept="image/*">
                             <div class="flex flex-col items-center">
                                 <i class="fas fa-cloud-arrow-up text-5xl text-green-600 dark:text-green-500"></i>
-                                <span class="mt-4 text-xl font-semibold text-gray-700 dark:text-gray-300">Drop your image here</span>
-                                <span class="text-gray-500">or click to browse</span>
+                                <span class="mt-4 text-xl font-semibold">Drop your image here</span>
+                                <span class="text-gray-500 dark:text-gray-400">or click to browse</span>
                             </div>
                         </label>
                     </div>
@@ -177,11 +359,11 @@
                     </div>
 
                     <!-- Button Group (Hidden) -->
-                    <div id="button-group" class="mt-6 hidden flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
-                        <button id="analyze-btn" class="btn-primary bg-gradient-to-r from-green-600 to-lime-500 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transform transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 hover:from-green-700 hover:to-lime-600 dark:from-green-500 dark:to-lime-400 dark:hover:from-green-600 dark:hover:to-lime-500 w-full sm:w-auto">
+                    <div id="button-group" class="mt-6 hidden flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+                        <button id="analyze-btn" class="btn-primary font-semibold py-3 px-6 rounded-xl shadow-lg transform transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 w-full sm:w-auto">
                             <i class="fas fa-search mr-2"></i>Analyze Image
                         </button>
-                        <button id="clear-btn" class="btn-outline bg-transparent border-2 border-green-700 text-green-700 font-semibold py-3 px-6 rounded-xl dark:border-green-500 dark:text-green-400 transform transition-all duration-300 ease-in-out hover:bg-green-700 hover:text-white dark:hover:bg-green-500 dark:hover:text-white w-full sm:w-auto">
+                        <button id="clear-btn" class="btn-outline font-semibold py-3 px-6 rounded-xl transform transition-all duration-300 ease-in-out w-full sm:w-auto">
                             <i class="fas fa-times mr-2"></i>Clear
                         </button>
                     </div>
@@ -189,12 +371,12 @@
 
                 <!-- Right Column (Sidebar) -->
                 <div id="how-it-works" class="md:col-span-2 space-y-8 mt-10 md:mt-0">
-                    <div class="glass-card bg-white/30 border border-white/10 shadow-lg shadow-black/5 dark:bg-gray-800/30 dark:border-gray-700/50 dark:shadow-black/10 p-6">
-                        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center">
+                    <div class="glass-card p-6">
+                        <h3 class="text-xl font-bold flex items-center">
                             <i class="fas fa-lightbulb text-yellow-400 mr-3"></i>
                             Tips for Accurate Results
                         </h3>
-                        <ul class="mt-4 space-y-3 text-gray-700 dark:text-gray-300 list-disc list-inside">
+                        <ul class="mt-4 space-y-3 list-disc list-inside">
                             <li>Use a clear, side-view photo of the animal.</li>
                             <li>Ensure good lighting, avoiding harsh shadows.</li>
                             <li>Make sure the animal is the main subject.</li>
@@ -202,12 +384,12 @@
                         </ul>
                     </div>
                     
-                    <div id="about" class="glass-card bg-white/30 border border-white/10 shadow-lg shadow-black/5 dark:bg-gray-800/30 dark:border-gray-700/50 dark:shadow-black/10 p-6">
-                        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center">
+                    <div id="about" class="glass-card p-6">
+                        <h3 class="text-xl font-bold flex items-center">
                             <i class="fas fa-info-circle text-blue-500 mr-3"></i>
                             About this Demo
                         </h3>
-                        <p class="mt-4 text-gray-700 dark:text-gray-300">
+                        <p class="mt-4">
                             This interactive demo simulates our AI model. When you click "Analyze," it mimics a request to our backend API and returns a pre-defined JSON response to showcase the tool's capabilities.
                         </p>
                     </div>
@@ -220,12 +402,12 @@
         <section id="results-section" class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 hidden">
             <!-- Loader (Hidden) -->
             <div id="loader" class="hidden flex justify-center items-center h-48">
-                <div class="spinner border-l-green-800 dark:border-l-green-300"></div>
+                <div class="spinner"></div>
             </div>
 
             <!-- Result Card (Hidden) -->
-            <div id="result-card" class="hidden glass-card bg-white/30 border border-white/10 shadow-lg shadow-black/5 dark:bg-gray-800/30 dark:border-gray-700/50 dark:shadow-black/10 p-8 max-w-4xl mx-auto">
-                <h2 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">Analysis Complete</h2>
+            <div id="result-card" class="hidden glass-card p-8 max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold text-center mb-6">Analysis Complete</h2>
                 
                 <div class="grid md:grid-cols-2 gap-6">
                     <!-- Left: Details -->
@@ -236,38 +418,38 @@
                         </div>
                         <div class="mb-4">
                             <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Confidence</span>
-                            <span id="confidence" class="text-2xl font-semibold text-gray-800 dark:text-gray-100"></span>
+                            <span id="confidence" class="text-2xl font-semibold"></span>
                         </div>
                         <div class="mb-4">
                             <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Family</span>
-                            <span id="family" class="text-2xl font-semibold text-gray-800 dark:text-gray-100"></span>
+                            <span id="family" class="text-2xl font-semibold"></span>
                         </div>
                         <div class="mt-6">
                             <span class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">AI Summary</span>
-                            <p id="ai-summary" class="text-gray-700 dark:text-gray-200 bg-green-50/50 dark:bg-green-900/30 p-4 rounded-lg border border-green-200 dark:border-green-800"></p>
+                            <p id="ai-summary" class="bg-green-50/50 dark:bg-green-900/30 p-4 rounded-lg border border-green-200 dark:border-green-800"></p>
                         </div>
                     </div>
                     
                     <!-- Right: Matches -->
                     <div>
-                        <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">Top Matches</h4>
+                        <h4 class="text-lg font-semibold mb-3">Top Matches</h4>
                         <div id="top-matches" class="flex flex-wrap gap-2">
                             <!-- Pills will be injected here -->
                         </div>
                         
                         <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-                            <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">Management Tip</h4>
-                            <p id="management-tip" class="text-gray-700 dark:text-gray-300"></p>
+                            <h4 class="text-lg font-semibold mb-3">Management Tip</h4>
+                            <p id="management-tip"></p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
-                    <button id="copy-summary-btn" class="btn-outline bg-transparent border-2 border-green-700 text-green-700 font-semibold py-3 px-6 rounded-xl dark:border-green-500 dark:text-green-400 transform transition-all duration-300 ease-in-out hover:bg-green-700 hover:text-white dark:hover:bg-green-500 dark:hover:text-white w-full sm:w-auto">
+                    <button id="copy-summary-btn" class="btn-outline font-semibold py-3 px-6 rounded-xl transform transition-all duration-300 ease-in-out w-full sm:w-auto">
                         <i class="fas fa-copy mr-2"></i>Copy Summary
                     </button>
-                    <button id="download-json-btn" class="btn-outline bg-transparent border-2 border-green-700 text-green-700 font-semibold py-3 px-6 rounded-xl dark:border-green-500 dark:text-green-400 transform transition-all duration-300 ease-in-out hover:bg-green-700 hover:text-white dark:hover:bg-green-500 dark:hover:text-white w-full sm:w-auto">
+                    <button id="download-json-btn" class="btn-outline font-semibold py-3 px-6 rounded-xl transform transition-all duration-300 ease-in-out w-full sm:w-auto">
                         <i class="fas fa-download mr-2"></i>Download JSON
                     </button>
                 </div>
@@ -278,13 +460,13 @@
 
     <!-- Footer -->
     <footer class="py-12 mt-16 text-center">
-        <p class="text-gray-500 dark:text-gray-400 text-sm">
+        <p class="text-sm text-gray-500 dark:text-gray-400">
             © <span id="footer-year"></span> Pashu Drishti — Built with ❤️ for farmers.
         </p>
     </footer>
 
     <!-- Floating Message Box -->
-    <div id="message-box" class="fixed bottom-10 right-10 bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 py-3 px-5 rounded-lg shadow-xl opacity-0 transform translate-y-2">
+    <div id="message-box" class="fixed bottom-10 right-10 py-3 px-5 rounded-lg shadow-xl opacity-0 transform translate-y-2" role="status" aria-live="polite" aria-atomic="true">
         Summary copied to clipboard!
     </div>
     
@@ -293,66 +475,53 @@
             // --- Element References ---
             const hamburgerBtn = document.getElementById('hamburger-btn');
             const mobileMenu = document.getElementById('mobile-menu');
-            
-            // Theme Toggles
-            const themeToggleDesktop = document.getElementById('theme-toggle-desktop');
-            const themeToggleMobile = document.getElementById('theme-toggle-mobile');
-            const themeToggleIcons = [themeToggleDesktop.querySelector('i'), themeToggleMobile.querySelector('i')];
-            
             const uploadInput = document.getElementById('file-upload');
-            // ... (rest of the element references are unchanged) ...
+            const uploadLabel = document.getElementById('upload-label');
             const uploadCard = document.getElementById('upload-card');
-            const uploadLabel = uploadCard.querySelector('label');
-            
             const previewCard = document.getElementById('preview-card');
             const imagePreview = document.getElementById('image-preview');
             const buttonGroup = document.getElementById('button-group');
-            
             const analyzeBtn = document.getElementById('analyze-btn');
             const clearBtn = document.getElementById('clear-btn');
-            
             const resultsSection = document.getElementById('results-section');
             const loader = document.getElementById('loader');
             const resultCard = document.getElementById('result-card');
-
             const breedNameEl = document.getElementById('breed-name');
             const confidenceEl = document.getElementById('confidence');
             const familyEl = document.getElementById('family');
             const aiSummaryEl = document.getElementById('ai-summary');
             const managementTipEl = document.getElementById('management-tip');
             const topMatchesEl = document.getElementById('top-matches');
-            
             const copySummaryBtn = document.getElementById('copy-summary-btn');
             const downloadJsonBtn = document.getElementById('download-json-btn');
             const messageBox = document.getElementById('message-box');
+            
+            let lastAnalysisData = null;
 
-            let lastAnalysisData = null; // To store data for download
-
-            // --- Mock API Data ---
+            // Mock Data (replace with real API call)
             const mockData = {
-              "predicted_breed": "Gir",
-              "confidence": "87%",
-              "family": "Cattle",
-              "details": {
-                "ai_summary": "The Gir is one of the principal Zebu breeds originating in India. It is known for its high milk production and heat tolerance, distinguished by its rounded and domed forehead and long, pendulous ears.",
-                "management_tip": "Provide ample shade and access to fresh, cool water, especially during peak heat. Their grazing habits are efficient, but supplementary nutrition can boost milk yield."
-              },
-              "top_3_matches": [
-                {"breed": "Gir", "confidence": "87%"},
-                {"breed": "Sahiwal", "confidence": "9%"},
-                {"breed": "Rathi", "confidence": "4%"}
-              ]
+                "predicted_breed": "Gir",
+                "confidence": "94.5%",
+                "family": "Bos indicus",
+                "top_3_matches": [
+                    {"breed": "Gir", "confidence": "94.5%"},
+                    {"breed": "Sahiwal", "confidence": "3.2%"},
+                    {"breed": "Red Sindhi", "confidence": "1.8%"}
+                ],
+                "details": {
+                    "ai_summary": "The Gir breed is known for its distinctive appearance, with a convex forehead and long, curving horns. They are highly valued for milk production and heat tolerance.",
+                    "management_tip": "Ensure adequate shade and water supply. Regular deworming and vaccination are essential for maintaining health."
+                }
             };
             
-            // --- Event Listeners ---
+            // --- Dark Mode (robust, syncs with initial head script and tailwind.config) ---
+            const themeToggleDesktop = document.getElementById('theme-toggle-desktop');
+            const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+            const themeToggleIcons = [
+              themeToggleDesktop && themeToggleDesktop.querySelector('i'),
+              themeToggleMobile && themeToggleMobile.querySelector('i')
+            ].filter(Boolean);
 
-            // Toggle Mobile Menu
-            hamburgerBtn.addEventListener('click', () => {
-                const isHidden = mobileMenu.classList.toggle('hidden');
-                hamburgerBtn.innerHTML = isHidden ? '<i class="fas fa-bars"></i>' : '<i class="fas fa-times"></i>';
-            });
-
-            // --- Dark Mode Logic ---
             const updateThemeIcons = (isDarkMode) => {
                 const iconClass = isDarkMode ? 'fa-sun' : 'fa-moon';
                 themeToggleIcons.forEach(icon => {
@@ -361,46 +530,48 @@
                 });
             };
 
-            const toggleTheme = () => {
-                const isDarkMode = document.documentElement.classList.toggle('dark');
-                localStorage.theme = isDarkMode ? 'dark' : 'light';
-                updateThemeIcons(isDarkMode);
+            const setDarkMode = (isDark) => {
+                document.documentElement.classList.toggle('dark', isDark);
+                localStorage.theme = isDark ? 'dark' : 'light';
+                updateThemeIcons(isDark);
             };
 
-            // Set initial icon state
-            updateThemeIcons(document.documentElement.classList.contains('dark'));
+            const toggleTheme = () => setDarkMode(!document.documentElement.classList.contains('dark'));
 
-            // Add click listeners to both toggles
-            themeToggleDesktop.addEventListener('click', toggleTheme);
-            themeToggleMobile.addEventListener('click', toggleTheme);
+            // Initialize theme
+            const stored = localStorage.getItem('theme') || null;
+            const initialIsDark = stored
+              ? stored === 'dark'
+              : window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            setDarkMode(initialIsDark);
+
+            // Listeners
+            if (themeToggleDesktop) themeToggleDesktop.addEventListener('click', toggleTheme);
+            if (themeToggleMobile) themeToggleMobile.addEventListener('click', toggleTheme);
             
-            // --- File Upload Logic (Unchanged) ---
-
-            // Trigger file input from card click
-            uploadLabel.addEventListener('click', (e) => {
-                // ...
+            // --- Mobile Menu Toggle ---
+            hamburgerBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
             });
 
-            // Handle file upload
+            // --- File Upload Logic ---
+            uploadLabel.addEventListener('click', (e) => {
+                if (e.target !== uploadInput) {
+                    uploadInput.click();
+                }
+            });
+
             uploadInput.addEventListener('change', handleFileUpload);
-            
-            // Clear button
             clearBtn.addEventListener('click', resetUploader);
-
-            // Analyze button
             analyzeBtn.addEventListener('click', simulateAnalysis);
-
-            // Copy Summary button
             copySummaryBtn.addEventListener('click', copySummary);
-
-            // Download JSON button
             downloadJsonBtn.addEventListener('click', downloadJSON);
 
             // Set footer year
             document.getElementById('footer-year').textContent = new Date().getFullYear();
 
-            // --- Functions (Unchanged) ---
-
+            // --- Functions ---
             function handleFileUpload(event) {
                 const file = event.target.files[0];
                 if (file && file.type.startsWith('image/')) {
@@ -411,7 +582,6 @@
                         uploadCard.classList.add('hidden');
                         previewCard.classList.remove('hidden');
                         buttonGroup.classList.remove('hidden');
-                        // Hide results if a new image is_uploaded
                         resultsSection.classList.add('hidden');
                         resultCard.classList.add('hidden');
                     };
@@ -421,7 +591,7 @@
             }
 
             function resetUploader() {
-                uploadInput.value = null; // Clear file input
+                uploadInput.value = null;
                 imagePreview.src = '';
                 
                 uploadCard.classList.remove('hidden');
@@ -433,26 +603,21 @@
             }
 
             function simulateAnalysis() {
-                // Show section and loader
                 resultsSection.classList.remove('hidden');
                 loader.classList.remove('hidden');
-                resultCard.classList.add('hidden'); // Hide old results
+                resultCard.classList.add('hidden');
                 
-                // Scroll to loader
                 resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-                // Simulate API call delay
                 setTimeout(() => {
-                    lastAnalysisData = mockData; // Store data
+                    lastAnalysisData = mockData;
                     populateResultCard(mockData);
                     
-                    // Hide loader, show card
                     loader.classList.add('hidden');
                     resultCard.classList.remove('hidden');
                     
-                    // Scroll to results
                     resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 2000); // 2-second delay
+                }, 2000);
             }
 
             function populateResultCard(data) {
@@ -462,11 +627,10 @@
                 aiSummaryEl.textContent = data.details.ai_summary;
                 managementTipEl.textContent = data.details.management_tip;
 
-                // Populate top 3 matches
-                topMatchesEl.innerHTML = ''; // Clear old pills
+                topMatchesEl.innerHTML = '';
                 data.top_3_matches.forEach(match => {
                     const pill = document.createElement('span');
-                    pill.className = 'pill inline-block bg-green-100 text-green-800 text-sm font-medium mr-2 mb-2 px-3 py-1 rounded-full dark:bg-green-900 dark:text-green-200';
+                    pill.className = 'pill inline-block text-sm font-medium mr-2 mb-2 px-3 py-1 rounded-full';
                     pill.textContent = `${match.breed} (${match.confidence})`;
                     topMatchesEl.appendChild(pill);
                 });
@@ -482,10 +646,9 @@ Summary: ${lastAnalysisData.details.ai_summary}
 Tip: ${lastAnalysisData.details.management_tip}
                 `.trim();
                 
-                // Use a temporary textarea to copy text
                 const textArea = document.createElement('textarea');
                 textArea.value = summaryText;
-                textArea.style.position = 'fixed'; // Avoid scrolling
+                textArea.style.position = 'fixed';
                 textArea.style.opacity = 0;
                 document.body.appendChild(textArea);
                 textArea.focus();
@@ -508,27 +671,32 @@ Tip: ${lastAnalysisData.details.management_tip}
                 const downloadAnchorNode = document.createElement('a');
                 downloadAnchorNode.setAttribute("href", dataStr);
                 downloadAnchorNode.setAttribute("download", "pashu_drishti_analysis.json");
-                document.body.appendChild(downloadAnchorNode); // required for firefox
+                document.body.appendChild(downloadAnchorNode);
                 downloadAnchorNode.click();
                 downloadAnchorNode.remove();
             }
 
             function showMessage(message, isError = false) {
                 messageBox.textContent = message;
-                // Updated message box classes for dark mode
-                messageBox.className = `fixed bottom-10 right-10 py-3 px-5 rounded-lg shadow-xl opacity-0 transform translate-y-2 ${isError ? 'bg-red-600 text-white' : 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900'}`;
+                
+                if (isError) {
+                    messageBox.style.backgroundColor = '#DC2626';
+                    messageBox.style.color = 'white';
+                } else {
+                    // Reset to CSS-controlled colors
+                    messageBox.style.backgroundColor = '';
+                    messageBox.style.color = '';
+                }
 
-                // Animate in
                 setTimeout(() => {
                     messageBox.classList.remove('opacity-0', 'translate-y-2');
                     messageBox.classList.add('opacity-100', 'translate-y-0');
                 }, 10);
-                
-                // Animate out
+
                 setTimeout(() => {
                     messageBox.classList.add('opacity-0', 'translate-y-2');
                     messageBox.classList.remove('opacity-100', 'translate-y-0');
-                }, 3000); // Hide after 3 seconds
+                }, 3000);
             }
 
         });
