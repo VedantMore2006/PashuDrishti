@@ -1,403 +1,705 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Pashu Drishti — Top-Class AI Cattle Health</title>
-  <!-- Font Awesome for icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Google Fonts for Inter (enhanced typography) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #2f8e4a;
-      --primary-2: #5bb566;
-      --muted: #6b7280;
-      --text: #101828;
-      --bg: #f9fafb;
-      --card: #ffffff;
-      --glass: rgba(255,255,255,0.6);
-      --border: rgba(15,23,42,0.06);
-      --shadow: 0 4px 12px rgba(16,24,40,0.04);
-      --glass-shadow: 0 8px 32px rgba(16,24,40,0.06);
-      --radius: 16px;
-      --transition: all 0.3s ease;
-    }
-    body.dark {
-      --primary: #5bb566;
-      --primary-2: #2f8e4a;
-      --muted: #9ca3af;
-      --text: #f3f4f6;
-      --bg: #111827;
-      --card: #1f2937;
-      --glass: rgba(31,41,55,0.6);
-      --border: rgba(255,255,255,0.1);
-      --shadow: 0 4px 12px rgba(0,0,0,0.2);
-      --glass-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    }
-    /* Top-class container */
-    .cui-top {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      background: linear-gradient(180deg, rgba(233,246,234,0.8) 0%, var(--bg) 40%);
-      font-family: 'Inter', sans-serif;
-      color: var(--text);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      transition: var(--transition);
-    }
-    body.dark .cui-top {
-      background: linear-gradient(180deg, rgba(31,41,55,0.8) 0%, var(--bg) 40%);
-    }
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-    /* Header */
-    header {
-      background: transparent;
-      padding: 16px 0;
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      transition: var(--transition);
-    }
-    .nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .brand i { font-size: 28px; color: var(--primary); transition: var(--transition); }
-    .brand h1 { font-size: 20px; font-weight: 800; margin: 0; color: var(--primary); letter-spacing: -0.2px; }
-    .brand .sub { font-size: 13px; color: var(--muted); font-weight: 500; }
-    nav .links {
-      display: flex;
-      gap: 24px;
-      align-items: center;
-    }
-    nav a {
-      text-decoration: none;
-      color: var(--text);
-      font-weight: 600;
-      font-size: 15px;
-      opacity: 0.9;
-      position: relative;
-      transition: var(--transition);
-    }
-    nav a::after {
-      content: '';
-      position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: var(--primary);
-      transition: var(--transition);
-    }
-    nav a:hover::after { width: 100%; }
-    nav a:hover { opacity: 1; }
-    .cta-primary {
-      background: var(--primary);
-      color: #fff;
-      padding: 10px 20px;
-      border-radius: 12px;
-      border: none;
-      cursor: pointer;
-      font-weight: 700;
-      box-shadow: var(--shadow);
-      transition: var(--transition);
-    }
-    .cta-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(47,142,74,0.2); }
-    .dark-toggle {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 20px;
-      color: var(--muted);
-      transition: var(--transition);
-    }
-    .dark-toggle:hover { color: var(--primary); }
-    /* Mobile menu */
-    .mobile-toggle { display: none; background: none; border: none; font-size: 24px; color: var(--text); }
-    @media (max-width: 1024px) {
-      nav .links { display: none; flex-direction: column; position: absolute; top: 60px; right: 24px; background: var(--card); padding: 16px; border-radius: var(--radius); box-shadow: var(--shadow); gap: 16px; }
-      .mobile-toggle { display: inline-block; }
-      .nav-right { display: flex; align-items: center; gap: 12px; }
-    }
-    /* Hero */
-    .hero {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 32px;
-      align-items: start;
-      padding: 80px 0 60px;
-    }
-    .hero-left h2 { font-size: 42px; line-height: 1.1; margin-bottom: 16px; font-weight: 800; letter-spacing: -1px; }
-    .hero-left p { color: var(--muted); margin-bottom: 24px; font-size: 16px; font-weight: 400; line-height: 1.6; }
-    /* Upload card */
-    .card {
-      background: linear-gradient(180deg, var(--glass), var(--card));
-      border-radius: var(--radius);
-      box-shadow: var(--glass-shadow);
-      padding: 24px;
-      transition: var(--transition);
-    }
-    .card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(16,24,40,0.1); }
-    .upload-area {
-      border: 2px dashed var(--border);
-      border-radius: 12px;
-      padding: 24px;
-      text-align: center;
-      transition: var(--transition);
-      cursor: pointer;
-      background: rgba(255,255,255,0.05);
-    }
-    .upload-area:hover { border-color: var(--primary); background: rgba(91,181,102,0.05); transform: translateY(-2px); }
-    .upload-icon { font-size: 40px; color: var(--primary); margin-bottom: 12px; transition: var(--transition); }
-    .upload-area:hover .upload-icon { transform: scale(1.1); }
-    .browse-btn { margin-top: 16px; padding: 10px 16px; border-radius: 12px; border: none; background: var(--primary-2); color: #fff; font-weight: 700; cursor: pointer; transition: var(--transition); }
-    .browse-btn:hover { background: var(--primary); }
-    .preview { margin-top: 16px; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); transition: var(--transition); }
-    .preview img { width: 100%; display: block; object-fit: cover; max-height: 360px; }
-    .analyze-row { display: flex; gap: 12px; margin-top: 16px; align-items: center; }
-    .analyze-btn { flex: 1; padding: 14px; border-radius: 12px; border: none; cursor: pointer; background: linear-gradient(90deg, var(--primary), var(--primary-2)); color: #fff; font-weight: 800; transition: var(--transition); }
-    .analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(47,142,74,0.2); }
-    /* Result card */
-    .result {
-      margin-top: 24px;
-      padding: 20px;
-      border-radius: 12px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      transition: var(--transition);
-    }
-    .result h3 { margin: 0 0 8px; font-size: 18px; font-weight: 800; color: var(--text); }
-    .meta { color: var(--muted); font-size: 14px; margin-bottom: 12px; font-weight: 500; }
-    .top-list { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-    .pill { padding: 8px 12px; background: var(--glass); border-radius: 999px; border: 1px solid var(--border); font-weight: 600; font-size: 13px; transition: var(--transition); }
-    .pill:hover { background: rgba(91,181,102,0.1); }
-    /* Footer */
-    footer { margin-top: auto; padding: 40px 0; color: var(--muted); font-size: 14px; text-align: center; font-weight: 400; }
-    /* Focus styles */
-    :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 8px; }
-    /* Media queries */
-    @media (max-width: 1024px) {
-      .hero { grid-template-columns: 1fr; gap: 48px; }
-      .hero-left h2 { font-size: 36px; }
-    }
-    @media (max-width: 768px) {
-      .container { padding: 0 16px; }
-      .hero { padding: 60px 0 40px; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pashu Drishti - AI Cattle Analysis</title>
+    
+    <!-- Tailwind: ensure class-based dark mode BEFORE loading CDN -->
+    <script>
+        // configure Tailwind to use the "class" strategy for dark mode
+        window.tailwind = window.tailwind || {};
+        tailwind.config = { darkMode: 'class' };
+    </script>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Google Fonts (Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Dark Mode Flicker-Prevention Script -->
+    <script>
+        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark')
+        } else {
+          document.documentElement.classList.remove('dark')
+        }
+    </script>
+
+    <style>
+        /* ============================================
+           LIGHT MODE CSS (Default)
+           ============================================ */
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-image: linear-gradient(to bottom right, #FBFBF8, #F0F2EB);
+            color: #2E4F4F;
+        }
+
+        /* Glassmorphism Card Style - Light Mode */
+        .glass-card, .header-glass {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+        }
+
+        .header-glass {
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 0;
+            background-color: rgba(255, 255, 255, 0.4);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .glass-card {
+            background-color: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Navigation Link Style - Light Mode */
+        .nav-link {
+            color: #374151;
+            position: relative;
+        }
+
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #2E4F4F;
+            transition: width 0.3s;
+        }
+
+        .nav-link:hover {
+            color: #1F2937;
+        }
+
+        .nav-link:hover:after {
+            width: 100%;
+        }
+
+        /* Spinner - Light Mode */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #166534;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Message Box - Light Mode */
+        #message-box {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            background-color: #F3F4F6;
+            color: #111827;
+        }
+
+        /* Buttons - Light Mode */
+        .btn-primary {
+            background: linear-gradient(to right, #16a34a, #84cc16);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to right, #15803d, #65a30d);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid #15803d;
+            color: #15803d;
+        }
+
+        .btn-outline:hover {
+            background-color: #15803d;
+            color: white;
+        }
+
+        /* Upload Area - Light Mode */
+        .upload-area-border {
+            border-color: #9CA3AF;
+        }
+
+        .upload-area-border:hover {
+            border-color: #16a34a;
+            background-color: rgba(220, 252, 231, 0.5);
+        }
+
+        /* Result Pills - Light Mode */
+        .pill {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        /* ============================================
+           DARK MODE CSS (Applied when .dark class on html)
+           ============================================ */
+        
+        .dark body {
+            background-image: linear-gradient(to bottom right, #111827, #0d1117);
+            color: #D1D5DB;
+        }
+
+        /* Glassmorphism Card Style - Dark Mode */
+        .dark .header-glass {
+            background-color: rgba(17, 24, 39, 0.4);
+            border-bottom-color: rgba(55, 65, 81, 0.5);
+        }
+
+        .dark .glass-card {
+            background-color: rgba(31, 41, 55, 0.3);
+            border-color: rgba(55, 65, 81, 0.5);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Navigation Link Style - Dark Mode */
+        .dark .nav-link {
+            color: #D1D5DB;
+        }
+
+        .dark .nav-link:after {
+            background-color: #6EE7B7;
+        }
+
+        .dark .nav-link:hover {
+            color: #FFFFFF;
+        }
+
+        /* Spinner - Dark Mode */
+        .dark .spinner {
+            border-color: #374151;
+            border-left-color: #6EE7B7;
+        }
+
+        /* Message Box - Dark Mode */
+        .dark #message-box {
+            background-color: #1F2937;
+            color: #F3F4F6;
+        }
+
+        /* Buttons - Dark Mode */
+        .dark .btn-primary {
+            background: linear-gradient(to right, #22c55e, #84cc16);
+        }
+
+        .dark .btn-primary:hover {
+            background: linear-gradient(to right, #16a34a, #65a30d);
+        }
+
+        .dark .btn-outline {
+            border-color: #22c55e;
+            color: #6EE7B7;
+        }
+
+        .dark .btn-outline:hover {
+            background-color: #22c55e;
+            color: white;
+        }
+
+        /* Upload Area - Dark Mode */
+        .dark .upload-area-border {
+            border-color: #4B5563;
+        }
+
+        .dark .upload-area-border:hover {
+            border-color: #22c55e;
+            background-color: rgba(6, 78, 59, 0.2);
+        }
+
+        /* Result Pills - Dark Mode */
+        .dark .pill {
+            background-color: #064e3b;
+            color: #6EE7B7;
+        }
+
+        /* Text Colors - Dark Mode */
+        .dark h1,
+        .dark h2,
+        .dark h3,
+        .dark h4,
+        .dark .font-bold {
+            color: #F9FAFB;
+        }
+
+        .dark p,
+        .dark span,
+        .dark li {
+            color: #D1D5DB;
+        }
+
+        .dark .text-gray-500 {
+            color: #9CA3AF !important;
+        }
+
+        .dark .text-gray-600 {
+            color: #9CA3AF !important;
+        }
+
+        .dark .text-gray-700 {
+            color: #D1D5DB !important;
+        }
+
+        .dark .text-gray-800 {
+            color: #F3F4F6 !important;
+        }
+
+        .dark .text-gray-900 {
+            color: #F9FAFB !important;
+        }
+
+        /* ============================================
+           SHARED STYLES (Both Modes)
+           ============================================ */
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Smooth transitions */
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+    </style>
 </head>
-<body class="cui-top">
-  <header>
-    <div class="container nav">
-      <div class="brand">
-        <i class="fas fa-cow"></i>
-        <div>
-          <h1>Pashu Drishti</h1>
-          <div class="sub">AI Breed & Health Insights for Farmers</div>
-        </div>
-      </div>
-      <div class="nav-right">
-        <nav class="links" aria-label="Main">
-          <a href="#">Home</a>
-          <a href="#">How It Works</a>
-          <a href="#">About</a>
+<body class="antialiased">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 w-full header-glass">
+        <nav class="px-4 sm:px-6 lg:px-8 flex items-center h-20">
+            <!-- Logo / App Name -->
+            <a href="#" class="flex items-center space-x-2 mr-auto">
+                <i class="fas fa-cow text-2xl text-green-800 dark:text-green-500"></i>
+                <span class="text-2xl font-bold">Pashu Drishti</span>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#" class="nav-link font-medium">Home</a>
+                <a href="#how-it-works" class="nav-link font-medium">How It Works</a>
+                <a href="#about" class="nav-link font-medium">About</a>
+                <button class="btn-primary font-semibold py-2 px-5 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5">Try Demo</button>
+                <!-- Dark Mode Toggle (Desktop) -->
+                <button id="theme-toggle-desktop" class="text-2xl w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden">
+                <button id="hamburger-btn" class="text-2xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
         </nav>
-        <button class="cta-primary" id="try-btn">Try Demo</button>
-        <button class="dark-toggle" id="dark-toggle" aria-label="Toggle dark mode"><i class="fas fa-moon"></i></button>
-        <button class="mobile-toggle" id="mobile-toggle" aria-label="Open menu"><i class="fas fa-bars"></i></button>
-      </div>
+        
+        <!-- Mobile Menu (Hidden by default) -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-gray-800 shadow-xl">
+            <a href="#" class="block px-6 py-3 text-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700">Home</a>
+            <a href="#how-it-works" class="block px-6 py-3 text-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700">How It Works</a>
+            <a href="#about" class="block px-6 py-3 text-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700">About</a>
+            <div class="p-4 flex justify-between items-center space-x-4">
+                <button class="btn-primary font-semibold py-3 px-6 rounded-xl shadow-lg transform transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 w-full">Try Demo</button>
+                <!-- Dark Mode Toggle (Mobile) -->
+                <button id="theme-toggle-mobile" class="text-2xl w-12 h-12 flex-shrink-0 rounded-lg flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+            <div class="grid md:grid-cols-5 gap-12 items-start">
+                
+                <!-- Left Column (Content & Uploader) -->
+                <div class="md:col-span-3">
+                    <h1 class="text-4xl md:text-6xl font-extrabold leading-tight">
+                        AI-Powered Cattle
+                        <span class="text-green-700 dark:text-green-400">Health & Breed</span>
+                        Identification
+                    </h1>
+                    <p class="mt-6 text-lg max-w-2xl">
+                        Our advanced AI analyzes images of your cattle to instantly identify breeds, check for visual health indicators, and provide actionable insights. Built for the modern farmer.
+                    </p>
+
+                    <!-- Uploader Card -->
+                    <div id="upload-card" class="mt-10">
+                        <label id="upload-label" for="file-upload" class="upload-area-border relative block w-full border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all duration-300">
+                            <input id="file-upload" type="file" class="sr-only" accept="image/*">
+                            <div class="flex flex-col items-center">
+                                <i class="fas fa-cloud-arrow-up text-5xl text-green-600 dark:text-green-500"></i>
+                                <span class="mt-4 text-xl font-semibold">Drop your image here</span>
+                                <span class="text-gray-500 dark:text-gray-400">or click to browse</span>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <!-- Image Preview Card (Hidden) -->
+                    <div id="preview-card" class="mt-10 hidden">
+                        <div class="relative w-full h-80 rounded-2xl shadow-xl overflow-hidden">
+                            <img id="image-preview" src="" alt="Cattle preview" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+
+                    <!-- Button Group (Hidden) -->
+                    <div id="button-group" class="mt-6 hidden flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+                        <button id="analyze-btn" class="btn-primary font-semibold py-3 px-6 rounded-xl shadow-lg transform transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 w-full sm:w-auto">
+                            <i class="fas fa-search mr-2"></i>Analyze Image
+                        </button>
+                        <button id="clear-btn" class="btn-outline font-semibold py-3 px-6 rounded-xl transform transition-all duration-300 ease-in-out w-full sm:w-auto">
+                            <i class="fas fa-times mr-2"></i>Clear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Column (Sidebar) -->
+                <div id="how-it-works" class="md:col-span-2 space-y-8 mt-10 md:mt-0">
+                    <div class="glass-card p-6">
+                        <h3 class="text-xl font-bold flex items-center">
+                            <i class="fas fa-lightbulb text-yellow-400 mr-3"></i>
+                            Tips for Accurate Results
+                        </h3>
+                        <ul class="mt-4 space-y-3 list-disc list-inside">
+                            <li>Use a clear, side-view photo of the animal.</li>
+                            <li>Ensure good lighting, avoiding harsh shadows.</li>
+                            <li>Make sure the animal is the main subject.</li>
+                            <li>Avoid blurry or low-resolution images.</li>
+                        </ul>
+                    </div>
+                    
+                    <div id="about" class="glass-card p-6">
+                        <h3 class="text-xl font-bold flex items-center">
+                            <i class="fas fa-info-circle text-blue-500 mr-3"></i>
+                            About this Demo
+                        </h3>
+                        <p class="mt-4">
+                            This interactive demo simulates our AI model. When you click "Analyze," it mimics a request to our backend API and returns a pre-defined JSON response to showcase the tool's capabilities.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Result Section (Hidden) -->
+        <section id="results-section" class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 hidden">
+            <!-- Loader (Hidden) -->
+            <div id="loader" class="hidden flex justify-center items-center h-48">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- Result Card (Hidden) -->
+            <div id="result-card" class="hidden glass-card p-8 max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold text-center mb-6">Analysis Complete</h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Left: Details -->
+                    <div>
+                        <div class="mb-4">
+                            <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Predicted Breed</span>
+                            <span id="breed-name" class="text-3xl font-bold text-green-800 dark:text-green-400"></span>
+                        </div>
+                        <div class="mb-4">
+                            <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Confidence</span>
+                            <span id="confidence" class="text-2xl font-semibold"></span>
+                        </div>
+                        <div class="mb-4">
+                            <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Family</span>
+                            <span id="family" class="text-2xl font-semibold"></span>
+                        </div>
+                        <div class="mt-6">
+                            <span class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">AI Summary</span>
+                            <p id="ai-summary" class="bg-green-50/50 dark:bg-green-900/30 p-4 rounded-lg border border-green-200 dark:border-green-800"></p>
+                        </div>
+                    </div>
+                    
+                    <!-- Right: Matches -->
+                    <div>
+                        <h4 class="text-lg font-semibold mb-3">Top Matches</h4>
+                        <div id="top-matches" class="flex flex-wrap gap-2">
+                            <!-- Pills will be injected here -->
+                        </div>
+                        
+                        <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                            <h4 class="text-lg font-semibold mb-3">Management Tip</h4>
+                            <p id="management-tip"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+                    <button id="copy-summary-btn" class="btn-outline font-semibold py-3 px-6 rounded-xl transform transition-all duration-300 ease-in-out w-full sm:w-auto">
+                        <i class="fas fa-copy mr-2"></i>Copy Summary
+                    </button>
+                    <button id="download-json-btn" class="btn-outline font-semibold py-3 px-6 rounded-xl transform transition-all duration-300 ease-in-out w-full sm:w-auto">
+                        <i class="fas fa-download mr-2"></i>Download JSON
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-12 mt-16 text-center">
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+            © <span id="footer-year"></span> Pashu Drishti — Built with ❤️ for farmers.
+        </p>
+    </footer>
+
+    <!-- Floating Message Box -->
+    <div id="message-box" class="fixed bottom-10 right-10 py-3 px-5 rounded-lg shadow-xl opacity-0 transform translate-y-2" role="status" aria-live="polite" aria-atomic="true">
+        Summary copied to clipboard!
     </div>
-  </header>
-  <main class="container" role="main">
-    <section class="hero">
-      <div class="hero-left">
-        <h2>Top-Class AI for Real-World Cattle Health Analysis</h2>
-        <p>Upload a clear image of your animal to receive accurate breed predictions, confidence scores, and practical, farmer-friendly insights — powered by the Pashu Drishti API.</p>
-        <div class="card" aria-hidden="false">
-          <div style="display:flex;gap:12px;align-items:center;justify-content:space-between">
-            <div style="font-weight:800">Upload an Image</div>
-            <div style="color:var(--muted);font-size:13px">Accepted: JPG, PNG</div>
-          </div>
-          <div style="margin-top:16px;">
-            <div class="upload-area" id="upload-area" tabindex="0" role="button" aria-label="Upload image area">
-              <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-              <div style="font-weight:700">Drop Image Here or Click to Browse</div>
-              <div style="color:var(--muted);font-size:13px;margin-top:8px">For best results, use a close, well-lit side profile of the animal.</div>
-              <button class="browse-btn" id="browse-btn" type="button">Browse</button>
-              <input id="file-input" type="file" accept="image/*" style="display:none" />
-            </div>
-            <div class="preview" id="preview" style="display:none;margin-top:16px">
-              <img id="preview-img" alt="Uploaded preview" src="" />
-            </div>
-            <div class="analyze-row">
-              <button class="analyze-btn" id="analyze-btn" type="button">Analyze Image</button>
-              <button id="clear-btn" type="button" style="padding:12px 16px;border-radius:12px;border:1px solid var(--border);background:var(--card);cursor:pointer;transition:var(--transition)">Clear</button>
-            </div>
-            <!-- Result container -->
-            <div id="result-wrap" style="display:none">
-              <div class="result" id="result-card" aria-live="polite"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- Side panel -->
-      <aside>
-        <div class="card">
-          <div style="font-weight:800;margin-bottom:12px">Quick Tips for Accurate Results</div>
-          <ul style="margin:0;color:var(--muted);padding-left:20px;list-style-type:disc;font-size:15px;line-height:1.6">
-            <li>Ensure the animal is fully in frame with a clear side view.</li>
-            <li>Avoid heavy shadows; natural daylight works best.</li>
-            <li>Include the full body and head without extreme zoom.</li>
-          </ul>
-        </div>
-        <div style="height:24px"></div>
-        <div class="card">
-          <div style="font-weight:800;margin-bottom:8px">About This Demo</div>
-          <div style="color:var(--muted);font-size:14px;line-height:1.5">
-            This interface connects to your backend API for breed classification and insightful, actionable recommendations.
-          </div>
-        </div>
-      </aside>
-    </section>
-  </main>
-  <footer>
-    © <span id="year"></span> Pashu Drishti — Built with ❤️ for Farmers. <span style="color:var(--muted)">Local Hosting & API Integration Supported.</span>
-  </footer>
-  <script>
-    /* CONFIG - Update API_URL for your hosted API */
-    const API_URL = (function(){
-      return location.hostname.includes('localhost') || location.hostname === '127.0.0.1'
-        ? 'http://localhost:7860'
-        : location.origin; // Update in production
-    })();
-    // DOM elements
-    const fileInput = document.getElementById('file-input');
-    const uploadArea = document.getElementById('upload-area');
-    const browseBtn = document.getElementById('browse-btn');
-    const preview = document.getElementById('preview');
-    const previewImg = document.getElementById('preview-img');
-    const analyzeBtn = document.getElementById('analyze-btn');
-    const clearBtn = document.getElementById('clear-btn');
-    const resultWrap = document.getElementById('result-wrap');
-    const resultCard = document.getElementById('result-card');
-    const yearSpan = document.getElementById('year'); yearSpan.textContent = new Date().getFullYear();
-    const darkToggle = document.getElementById('dark-toggle');
-    let currentFile = null;
-    // Dark mode toggle
-    darkToggle.addEventListener('click', () => {
-      document.body.classList.toggle('dark');
-      darkToggle.innerHTML = document.body.classList.contains('dark') ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-    });
-    // File interactions (unchanged, polished)
-    uploadArea.addEventListener('click', () => fileInput.click());
-    browseBtn.addEventListener('click', () => fileInput.click());
-    uploadArea.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
-    fileInput.addEventListener('change', (e) => {
-      const f = e.target.files?.[0];
-      if (!f) return;
-      showPreview(f);
-    });
-    uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.style.borderColor = 'var(--primary)'; });
-    uploadArea.addEventListener('dragleave', () => { uploadArea.style.borderColor = ''; });
-    uploadArea.addEventListener('drop', (e) => {
-      e.preventDefault();
-      const f = e.dataTransfer.files?.[0];
-      if (f && f.type.startsWith('image/')) showPreview(f);
-    });
-    clearBtn.addEventListener('click', () => {
-      currentFile = null;
-      preview.style.display = 'none';
-      fileInput.value = '';
-      resultWrap.style.display = 'none';
-      resultCard.innerHTML = '';
-    });
-    function showPreview(file) {
-      currentFile = file;
-      const url = URL.createObjectURL(file);
-      previewImg.src = url;
-      preview.style.display = 'block';
-      resultWrap.style.display = 'none';
-      resultCard.innerHTML = '';
-    }
-    // Analyze
-    analyzeBtn.addEventListener('click', async () => {
-      if (!currentFile) {
-        alert('Please upload an image first.');
-        return;
-      }
-      const form = new FormData();
-      form.append('file', currentFile, currentFile.name);
-      resultWrap.style.display = 'block';
-      resultCard.innerHTML = `<div style="display:flex;align-items:center;gap:12px">
-        <div class="spinner" aria-hidden="true" style="width:36px;height:36px;border-radius:50%;border:4px solid var(--border);border-top-color:var(--primary);animation:spin 0.9s linear infinite"></div>
-        <div><strong>Analyzing — Just a Moment</strong><div style="color:var(--muted);font-size:13px;margin-top:4px">Uploading image and running inference via API.</div></div>
-      </div>
-      <style>@keyframes spin{to{transform:rotate(360deg)}}</style>`;
-      try {
-        const res = await fetch(API_URL + '/predict', { method: 'POST', body: form });
-        if (!res.ok) throw new Error('Server error: ' + (await res.text() || res.status));
-        const data = await res.json();
-        showResult(data);
-      } catch (err) {
-        resultCard.innerHTML = `<div style="color:#ef4444"><strong>Analysis Failed:</strong> ${err.message}</div>
-        <div style="color:var(--muted);margin-top:8px;font-size:13px">Verify API_URL and backend setup. Check console for details.</div>`;
-        console.error(err);
-      }
-    });
-    // Result rendering
-    function showResult(payload) {
-      const breed = payload.predicted_breed || 'Unknown';
-      const conf = payload.confidence || 'N/A';
-      const fam = payload.family || '';
-      const details = payload.details || {};
-      const top = payload.top_3_matches || [];
-      resultCard.innerHTML = `
-        <h3>${breed} <span style="font-weight:600;color:var(--muted);font-size:14px">(${fam})</span></h3>
-        <div class="meta">Confidence: <strong>${conf}</strong></div>
-        <div style="color:var(--muted);font-size:14px;margin-top:8px;line-height:1.5">${details.ai_summary || details.enhanced_traits || 'No additional insights available.'}</div>
-        <div style="margin-top:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-          <button class="cta-primary" id="copy-btn">Copy Summary</button>
-          <button style="padding:10px 16px;border-radius:12px;border:1px solid var(--border);background:var(--card);cursor:pointer;transition:var(--transition)" id="download-btn">Download JSON</button>
-        </div>
-        <div style="margin-top:16px">
-          <div style="font-weight:700;margin-bottom:8px">Top Matches</div>
-          <div class="top-list">
-            ${top.map(t => `<div class="pill">${t.breed} • ${t.confidence}</div>`).join('')}
-          </div>
-        </div>
-        <div style="margin-top:16px;color:var(--muted);font-size:14px">${details.management_tip ? `<strong>Management Tip:</strong> ${details.management_tip}` : ''}</div>
-      `;
-      document.getElementById('copy-btn').addEventListener('click', () => {
-        const text = details.ai_summary || details.enhanced_traits || `${breed} — ${conf}`;
-        navigator.clipboard?.writeText(text).then(() => alert('Summary copied! 👍'), () => alert('Copy failed—browser may restrict clipboard access.'));
-      });
-      document.getElementById('download-btn').addEventListener('click', () => {
-        const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = `pashu_result_${breed.replace(/\s+/g, '_')}.json`;
-        document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-      });
-    }
-    // Mobile menu
-    document.getElementById('mobile-toggle').addEventListener('click', () => {
-      const nav = document.querySelector('nav.links');
-      nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
-    });
-    console.log('Pashu Drishti UI loaded — API_URL =', API_URL);
-  </script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Element References ---
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const uploadInput = document.getElementById('file-upload');
+            const uploadLabel = document.getElementById('upload-label');
+            const uploadCard = document.getElementById('upload-card');
+            const previewCard = document.getElementById('preview-card');
+            const imagePreview = document.getElementById('image-preview');
+            const buttonGroup = document.getElementById('button-group');
+            const analyzeBtn = document.getElementById('analyze-btn');
+            const clearBtn = document.getElementById('clear-btn');
+            const resultsSection = document.getElementById('results-section');
+            const loader = document.getElementById('loader');
+            const resultCard = document.getElementById('result-card');
+            const breedNameEl = document.getElementById('breed-name');
+            const confidenceEl = document.getElementById('confidence');
+            const familyEl = document.getElementById('family');
+            const aiSummaryEl = document.getElementById('ai-summary');
+            const managementTipEl = document.getElementById('management-tip');
+            const topMatchesEl = document.getElementById('top-matches');
+            const copySummaryBtn = document.getElementById('copy-summary-btn');
+            const downloadJsonBtn = document.getElementById('download-json-btn');
+            const messageBox = document.getElementById('message-box');
+            
+            let lastAnalysisData = null;
+
+            // Mock Data (replace with real API call)
+            const mockData = {
+                "predicted_breed": "Gir",
+                "confidence": "94.5%",
+                "family": "Bos indicus",
+                "top_3_matches": [
+                    {"breed": "Gir", "confidence": "94.5%"},
+                    {"breed": "Sahiwal", "confidence": "3.2%"},
+                    {"breed": "Red Sindhi", "confidence": "1.8%"}
+                ],
+                "details": {
+                    "ai_summary": "The Gir breed is known for its distinctive appearance, with a convex forehead and long, curving horns. They are highly valued for milk production and heat tolerance.",
+                    "management_tip": "Ensure adequate shade and water supply. Regular deworming and vaccination are essential for maintaining health."
+                }
+            };
+            
+            // --- Dark Mode (robust, syncs with initial head script and tailwind.config) ---
+            const themeToggleDesktop = document.getElementById('theme-toggle-desktop');
+            const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+            const themeToggleIcons = [
+              themeToggleDesktop && themeToggleDesktop.querySelector('i'),
+              themeToggleMobile && themeToggleMobile.querySelector('i')
+            ].filter(Boolean);
+
+            const updateThemeIcons = (isDarkMode) => {
+                const iconClass = isDarkMode ? 'fa-sun' : 'fa-moon';
+                themeToggleIcons.forEach(icon => {
+                    icon.classList.remove('fa-sun', 'fa-moon');
+                    icon.classList.add(iconClass);
+                });
+            };
+
+            const setDarkMode = (isDark) => {
+                document.documentElement.classList.toggle('dark', isDark);
+                localStorage.theme = isDark ? 'dark' : 'light';
+                updateThemeIcons(isDark);
+            };
+
+            const toggleTheme = () => setDarkMode(!document.documentElement.classList.contains('dark'));
+
+            // Initialize theme
+            const stored = localStorage.getItem('theme') || null;
+            const initialIsDark = stored
+              ? stored === 'dark'
+              : window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            setDarkMode(initialIsDark);
+
+            // Listeners
+            if (themeToggleDesktop) themeToggleDesktop.addEventListener('click', toggleTheme);
+            if (themeToggleMobile) themeToggleMobile.addEventListener('click', toggleTheme);
+            
+            // --- Mobile Menu Toggle ---
+            hamburgerBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // --- File Upload Logic ---
+            uploadLabel.addEventListener('click', (e) => {
+                if (e.target !== uploadInput) {
+                    uploadInput.click();
+                }
+            });
+
+            uploadInput.addEventListener('change', handleFileUpload);
+            clearBtn.addEventListener('click', resetUploader);
+            analyzeBtn.addEventListener('click', simulateAnalysis);
+            copySummaryBtn.addEventListener('click', copySummary);
+            downloadJsonBtn.addEventListener('click', downloadJSON);
+
+            // Set footer year
+            document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+            // --- Functions ---
+            function handleFileUpload(event) {
+                const file = event.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = (e) => {
+                        imagePreview.src = e.target.result;
+                        uploadCard.classList.add('hidden');
+                        previewCard.classList.remove('hidden');
+                        buttonGroup.classList.remove('hidden');
+                        resultsSection.classList.add('hidden');
+                        resultCard.classList.add('hidden');
+                    };
+                    
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            function resetUploader() {
+                uploadInput.value = null;
+                imagePreview.src = '';
+                
+                uploadCard.classList.remove('hidden');
+                previewCard.classList.add('hidden');
+                buttonGroup.classList.add('hidden');
+                resultsSection.classList.add('hidden');
+                resultCard.classList.add('hidden');
+                lastAnalysisData = null;
+            }
+
+            function simulateAnalysis() {
+                resultsSection.classList.remove('hidden');
+                loader.classList.remove('hidden');
+                resultCard.classList.add('hidden');
+                
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                setTimeout(() => {
+                    lastAnalysisData = mockData;
+                    populateResultCard(mockData);
+                    
+                    loader.classList.add('hidden');
+                    resultCard.classList.remove('hidden');
+                    
+                    resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 2000);
+            }
+
+            function populateResultCard(data) {
+                breedNameEl.textContent = data.predicted_breed;
+                confidenceEl.textContent = data.confidence;
+                familyEl.textContent = data.family;
+                aiSummaryEl.textContent = data.details.ai_summary;
+                managementTipEl.textContent = data.details.management_tip;
+
+                topMatchesEl.innerHTML = '';
+                data.top_3_matches.forEach(match => {
+                    const pill = document.createElement('span');
+                    pill.className = 'pill inline-block text-sm font-medium mr-2 mb-2 px-3 py-1 rounded-full';
+                    pill.textContent = `${match.breed} (${match.confidence})`;
+                    topMatchesEl.appendChild(pill);
+                });
+            }
+
+            function copySummary() {
+                if (!lastAnalysisData) return;
+
+                const summaryText = `
+Breed: ${lastAnalysisData.predicted_breed} (${lastAnalysisData.confidence})
+Family: ${lastAnalysisData.family}
+Summary: ${lastAnalysisData.details.ai_summary}
+Tip: ${lastAnalysisData.details.management_tip}
+                `.trim();
+                
+                const textArea = document.createElement('textarea');
+                textArea.value = summaryText;
+                textArea.style.position = 'fixed';
+                textArea.style.opacity = 0;
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    showMessage("Summary copied to clipboard!");
+                } catch (err) {
+                    showMessage("Failed to copy summary.", true);
+                }
+
+                document.body.removeChild(textArea);
+            }
+            
+            function downloadJSON() {
+                if (!lastAnalysisData) return;
+                
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(lastAnalysisData, null, 2));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", "pashu_drishti_analysis.json");
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+            }
+
+            function showMessage(message, isError = false) {
+                messageBox.textContent = message;
+                
+                if (isError) {
+                    messageBox.style.backgroundColor = '#DC2626';
+                    messageBox.style.color = 'white';
+                } else {
+                    // Reset to CSS-controlled colors
+                    messageBox.style.backgroundColor = '';
+                    messageBox.style.color = '';
+                }
+
+                setTimeout(() => {
+                    messageBox.classList.remove('opacity-0', 'translate-y-2');
+                    messageBox.classList.add('opacity-100', 'translate-y-0');
+                }, 10);
+
+                setTimeout(() => {
+                    messageBox.classList.add('opacity-0', 'translate-y-2');
+                    messageBox.classList.remove('opacity-100', 'translate-y-0');
+                }, 3000);
+            }
+
+        });
+    </script>
 </body>
 </html>
