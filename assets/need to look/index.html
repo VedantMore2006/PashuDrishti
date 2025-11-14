@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pashu Drishti - AI Cattle Analysis</title>
+    
+    <!-- Tailwind: ensure class-based dark mode BEFORE loading CDN -->
+    <script>
+        // configure Tailwind to use the "class" strategy for dark mode
+        window.tailwind = window.tailwind || {};
+        tailwind.config = { darkMode: 'class' };
+    </script>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Google Fonts (Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Dark Mode Flicker-Prevention Script -->
+    <script>
+        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark')
+        } else {
+          document.documentElement.classList.remove('dark')
+        }
+    </script>
+
+    <style>
+        /* ============================================
+           LIGHT MODE CSS (Default)
+           ============================================ */
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-image: linear-gradient(to bottom right, #FBFBF8, #F0F2EB);
+            color: #2E4F4F;
+        }
+
+        /* Glassmorphism Card Style - Light Mode */
+        .glass-card, .header-glass {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+        }
+
+        .header-glass {
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 0;
+            background-color: rgba(255, 255, 255, 0.4);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .glass-card {
+            background-color: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Navigation Link Style - Light Mode */
+        .nav-link {
+            color: #374151;
+            position: relative;
+        }
+
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #2E4F4F;
+            transition: width 0.3s;
+        }
+
+        .nav-link:hover {
+            color: #1F2937;
+        }
+
+        .nav-link:hover:after {
+            width: 100%;
+        }
+
+        /* Spinner - Light Mode */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #166534;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Message Box - Light Mode */
+        #message-box {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            background-color: #F3F4F6;
+            color: #111827;
+        }
+
+        /* Buttons - Light Mode */
+        .btn-primary {
+            background: linear-gradient(to right, #16a34a, #84cc16);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to right, #15803d, #65a30d);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid #15803d;
+            color: #15803d;
+        }
+
+        .btn-outline:hover {
+            background-color: #15803d;
+            color: white;
+        }
+
+        /* Upload Area - Light Mode */
+        .upload-area-border {
+            border-color: #9CA3AF;
+        }
+
+        .upload-area-border:hover {
+            border-color: #16a34a;
+            background-color: rgba(220, 252, 231, 0.5);
+        }
+
+        /* Result Pills - Light Mode */
+        .pill {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        /* ============================================
+           DARK MODE CSS (Applied when .dark class on html)
+           ============================================ */
+        
+        .dark body {
+            background-image: linear-gradient(to bottom right, #111827, #0d1117);
+            color: #D1D5DB;
+        }
+
+        /* Glassmorphism Card Style - Dark Mode */
+        .dark .header-glass {
+            background-color: rgba(17, 24, 39, 0.4);
+            border-bottom-color: rgba(55, 65, 81, 0.5);
+        }
+
+        .dark .glass-card {
+            background-color: rgba(31, 41, 55, 0.3);
+            border-color: rgba(55, 65, 81, 0.5);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Navigation Link Style - Dark Mode */
+        .dark .nav-link {
+            color: #D1D5DB;
+        }
+
+        .dark .nav-link:after {
+            background-color: #6EE7B7;
+        }
+
+        .dark .nav-link:hover {
+            color: #FFFFFF;
+        }
+
+        /* Spinner - Dark Mode */
+        .dark .spinner {
+            border-color: #374151;
+            border-left-color: #6EE7B7;
+        }
+
+        /* Message Box - Dark Mode */
+        .dark #message-box {
+            background-color: #1F2937;
+            color: #F3F4F6;
+        }
+
+        /* Buttons - Dark Mode */
+        .dark .btn-primary {
+            background: linear-gradient(to right, #22c55e, #84cc16);
+        }
+
+        .dark .btn-primary:hover {
+            background: linear-gradient(to right, #16a34a, #65a30d);
+        }
+
+        .dark .btn-outline {
+            border-color: #22c55e;
+            color: #6EE7B7;
+        }
+
+        .dark .btn-outline:hover {
+            background-color: #22c55e;
+            color: white;
+        }
+
+        /* Upload Area - Dark Mode */
+        .dark .upload-area-border {
+            border-color: #4B5563;
+        }
+
+        .dark .upload-area-border:hover {
+            border-color: #22c55e;
+            background-color: rgba(6, 78, 59, 0.2);
+        }
+
+        /* Result Pills - Dark Mode */
+        .dark .pill {
+            background-color: #064e3b;
+            color: #6EE7B7;
+        }
+
+        /* Text Colors - Dark Mode */
+        .dark h1,
+        .dark h2,
+        .dark h3,
+        .dark h4,
+        .dark .font-bold {
+            color: #F9FAFB;
+        }
+
+        .dark p,
+        .dark span,
+        .dark li {
+            color: #D1D5DB;
+        }
+
+        .dark .text-gray-500 {
+            color: #9CA3AF !important;
+        }
+
+        .dark .text-gray-600 {
+            color: #9CA3AF !important;
+        }
+
+        .dark .text-gray-700 {
+            color: #D1D5DB !important;
+        }
+
+        .dark .text-gray-800 {
+            color: #F3F4F6 !important;
+        }
+
+        .dark .text-gray-900 {
+            color: #F9FAFB !important;
+        }
+
+        /* ============================================
+           SHARED STYLES (Both Modes)
+           ============================================ */
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Smooth transitions */
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 w-full header-glass">
+        <nav class="px-4 sm:px-6 lg:px-8 flex items-center h-20">
+            <!-- Logo / App Name -->
+            <a href="#" class="flex items-center space-x-2 mr-auto">
+                <i class="fas fa-cow text-2xl text-green-800 dark:text-green-500"></i>
+                <span class="text-2xl font-bold">Pashu Drishti</span>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#" class="nav-link font-medium">Home</a>
+                <a href="#how-it-works" class="nav-link font-medium">How It Works</a>
+                <a href="#about" class="nav-link font-medium">About</a>
+                <button class="btn-primary font-semibold py-2 px-5 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5">Try Demo</button>
+                <!-- Dark Mode Toggle (Desktop) -->
+                <button id="theme-toggle-desktop" class="text-2xl w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden">
+                <button id="hamburger-btn" class="text-2xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+        
+        <!-- Mobile Menu (Hidden by default) -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-gray-800 shadow-xl">
+            <a href="#" class="block px-6 py-3 text-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700">Home</a>
+            <a href="#how-it-works" class="block px-6 py-3 text-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700">How It Works</a>
+            <a href="#about" class="block px-6 py-3 text-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700">About</a>
+            <div class="p-4 flex justify-between items-center space-x-4">
+                <button class="btn-primary font-semibold py-3 px-6 rounded-xl shadow-lg transform transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 w-full">Try Demo</button>
+                <!-- Dark Mode Toggle (Mobile) -->
+                <button id="theme-toggle-mobile" class="text-2xl w-12 h-12 flex-shrink-0 rounded-lg flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+            <div class="grid md:grid-cols-5 gap-12 items-start">
+                
+                <!-- Left Column (Content & Uploader) -->
+                <div class="md:col-span-3">
+                    <h1 class="text-4xl md:text-6xl font-extrabold leading-tight">
+                        AI-Powered Cattle
+                        <span class="text-green-700 dark:text-green-400">Health & Breed</span>
+                        Identification
+                    </h1>
+                    <p class="mt-6 text-lg max-w-2xl">
+                        Our advanced AI analyzes images of your cattle to instantly identify breeds, check for visual health indicators, and provide actionable insights. Built for the modern farmer.
+                    </p>
+
+                    <!-- Uploader Card -->
+                    <div id="upload-card" class="mt-10">
+                        <label id="upload-label" for="file-upload" class="upload-area-border relative block w-full border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all duration-300">
+                            <input id="file-upload" type="file" class="sr-only" accept="image/*">
+                            <div class="flex flex-col items-center">
+                                <i class="fas fa-cloud-arrow-up text-5xl text-green-600 dark:text-green-500"></i>
+                                <span class="mt-4 text-xl font-semibold">Drop your image here</span>
+                                <span class="text-gray-500 dark:text-gray-400">or click to browse</span>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <!-- Image Preview Card (Hidden) -->
+                    <div id="preview-card" class="mt-10 hidden">
+                        <div class="relative w-full h-80 rounded-2xl shadow-xl overflow-hidden">
+                            <img id="image-preview" src="" alt="Cattle preview" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+
+                    <!-- Button Group (Hidden) -->
+                    <div id="button-group" class="mt-6 hidden flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+                        <button id="analyze-btn" class="btn-primary font-semibold py-3 px-6 rounded-xl shadow-lg transform transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 w-full sm:w-auto">
+                            <i class="fas fa-search mr-2"></i>Analyze Image
+                        </button>
+                        <button id="clear-btn" class="btn-outline font-semibold py-3 px-6 rounded-xl transform transition-all duration-300 ease-in-out w-full sm:w-auto">
+                            <i class="fas fa-times mr-2"></i>Clear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Column (Sidebar) -->
+                <div id="how-it-works" class="md:col-span-2 space-y-8 mt-10 md:mt-0">
+                    <div class="glass-card p-6">
+                        <h3 class="text-xl font-bold flex items-center">
+                            <i class="fas fa-lightbulb text-yellow-400 mr-3"></i>
+                            Tips for Accurate Results
+                        </h3>
+                        <ul class="mt-4 space-y-3 list-disc list-inside">
+                            <li>Use a clear, side-view photo of the animal.</li>
+                            <li>Ensure good lighting, avoiding harsh shadows.</li>
+                            <li>Make sure the animal is the main subject.</li>
+                            <li>Avoid blurry or low-resolution images.</li>
+                        </ul>
+                    </div>
+                    
+                    <div id="about" class="glass-card p-6">
+                        <h3 class="text-xl font-bold flex items-center">
+                            <i class="fas fa-info-circle text-blue-500 mr-3"></i>
+                            About this Demo
+                        </h3>
+                        <p class="mt-4">
+                            This interactive demo simulates our AI model. When you click "Analyze," it mimics a request to our backend API and returns a pre-defined JSON response to showcase the tool's capabilities.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Result Section (Hidden) -->
+        <section id="results-section" class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 hidden">
+            <!-- Loader (Hidden) -->
+            <div id="loader" class="hidden flex justify-center items-center h-48">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- Result Card (Hidden) -->
+            <div id="result-card" class="hidden glass-card p-8 max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold text-center mb-6">Analysis Complete</h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Left: Details -->
+                    <div>
+                        <div class="mb-4">
+                            <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Predicted Breed</span>
+                            <span id="breed-name" class="text-3xl font-bold text-green-800 dark:text-green-400"></span>
+                        </div>
+                        <div class="mb-4">
+                            <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Confidence</span>
+                            <span id="confidence" class="text-2xl font-semibold"></span>
+                        </div>
+                        <div class="mb-4">
+                            <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Family</span>
+                            <span id="family" class="text-2xl font-semibold"></span>
+                        </div>
+                        <div class="mt-6">
+                            <span class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">AI Summary</span>
+                            <p id="ai-summary" class="bg-green-50/50 dark:bg-green-900/30 p-4 rounded-lg border border-green-200 dark:border-green-800"></p>
+                        </div>
+                    </div>
+                    
+                    <!-- Right: Matches -->
+                    <div>
+                        <h4 class="text-lg font-semibold mb-3">Top Matches</h4>
+                        <div id="top-matches" class="flex flex-wrap gap-2">
+                            <!-- Pills will be injected here -->
+                        </div>
+                        
+                        <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                            <h4 class="text-lg font-semibold mb-3">Management Tip</h4>
+                            <p id="management-tip"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+                    <button id="copy-summary-btn" class="btn-outline font-semibold py-3 px-6 rounded-xl transform transition-all duration-300 ease-in-out w-full sm:w-auto">
+                        <i class="fas fa-copy mr-2"></i>Copy Summary
+                    </button>
+                    <button id="download-json-btn" class="btn-outline font-semibold py-3 px-6 rounded-xl transform transition-all duration-300 ease-in-out w-full sm:w-auto">
+                        <i class="fas fa-download mr-2"></i>Download JSON
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-12 mt-16 text-center">
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+            © <span id="footer-year"></span> Pashu Drishti — Built with ❤️ for farmers.
+        </p>
+    </footer>
+
+    <!-- Floating Message Box -->
+    <div id="message-box" class="fixed bottom-10 right-10 py-3 px-5 rounded-lg shadow-xl opacity-0 transform translate-y-2" role="status" aria-live="polite" aria-atomic="true">
+        Summary copied to clipboard!
+    </div>
+    
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+  // === CONFIG ===
+  const API_URL = "https://pashudrishti-1yz2.onrender.com/predict";
+  
+  // === CLASSIFY IMAGE FUNCTION ===
+  async function classifyImage(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+    console.log(data);
+    return data;
+  }
+
+  // --- Element References ---
+  const hamburgerBtn = document.getElementById('hamburger-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const uploadInput = document.getElementById('file-upload');
+  const uploadLabel = document.getElementById('upload-label');
+  const uploadCard = document.getElementById('upload-card');
+  const previewCard = document.getElementById('preview-card');
+  const imagePreview = document.getElementById('image-preview');
+  const buttonGroup = document.getElementById('button-group');
+  const analyzeBtn = document.getElementById('analyze-btn');
+  const clearBtn = document.getElementById('clear-btn');
+  const resultsSection = document.getElementById('results-section');
+  const loader = document.getElementById('loader');
+  const resultCard = document.getElementById('result-card');
+  const breedNameEl = document.getElementById('breed-name');
+  const confidenceEl = document.getElementById('confidence');
+  const familyEl = document.getElementById('family');
+  const aiSummaryEl = document.getElementById('ai-summary');
+  const managementTipEl = document.getElementById('management-tip');
+  const topMatchesEl = document.getElementById('top-matches');
+  const copySummaryBtn = document.getElementById('copy-summary-btn');
+  const downloadJsonBtn = document.getElementById('download-json-btn');
+  const messageBox = document.getElementById('message-box');
+  document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+  let lastAnalysisData = null;
+
+  // === DARK MODE ===
+  const themeToggleDesktop = document.getElementById('theme-toggle-desktop');
+  const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+  const themeIcons = [themeToggleDesktop, themeToggleMobile]
+    .filter(Boolean)
+    .map(btn => btn.querySelector('i'));
+  const updateIcons = (isDark) => {
+    themeIcons.forEach(icon => {
+      icon.classList.remove('fa-moon', 'fa-sun');
+      icon.classList.add(isDark ? 'fa-sun' : 'fa-moon');
+    });
+  };
+  const setDark = (isDark) => {
+    document.documentElement.classList.toggle('dark', isDark);
+    localStorage.theme = isDark ? 'dark' : 'light';
+    updateIcons(isDark);
+  };
+  const toggleTheme = () => setDark(!document.documentElement.classList.contains('dark'));
+  const storedTheme = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  setDark(storedTheme ? storedTheme === 'dark' : prefersDark);
+  if (themeToggleDesktop) themeToggleDesktop.addEventListener('click', toggleTheme);
+  if (themeToggleMobile) themeToggleMobile.addEventListener('click', toggleTheme);
+
+  // === MENU TOGGLE ===
+  hamburgerBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+
+  // === FILE UPLOAD ===
+  uploadLabel.addEventListener('click', (e) => {
+    if (e.target !== uploadInput) uploadInput.click();
+  });
+  uploadInput.addEventListener('change', handleFileUpload);
+  clearBtn.addEventListener('click', resetUploader);
+  analyzeBtn.addEventListener('click', analyzeImage);
+  copySummaryBtn.addEventListener('click', copySummary);
+  downloadJsonBtn.addEventListener('click', downloadJSON);
+
+  function handleFileUpload(e) {
+    const file = e.target.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      imagePreview.src = ev.target.result;
+      uploadCard.classList.add('hidden');
+      previewCard.classList.remove('hidden');
+      buttonGroup.classList.remove('hidden');
+      resultsSection.classList.add('hidden');
+      resultCard.classList.add('hidden');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function resetUploader() {
+    uploadInput.value = null;
+    imagePreview.src = '';
+    uploadCard.classList.remove('hidden');
+    previewCard.classList.add('hidden');
+    buttonGroup.classList.add('hidden');
+    resultsSection.classList.add('hidden');
+    resultCard.classList.add('hidden');
+    lastAnalysisData = null;
+  }
+
+  async function analyzeImage() {
+    const file = uploadInput.files[0];
+    if (!file) return showMessage("Please upload an image first.", true);
+
+    resultsSection.classList.remove('hidden');
+    loader.classList.remove('hidden');
+    resultCard.classList.add('hidden');
+    resultsSection.scrollIntoView({ behavior: 'smooth' });
+
+    try {
+      const data = await classifyImage(file);
+      lastAnalysisData = data;
+      populateResultCard(data);
+
+      loader.classList.add('hidden');
+      resultCard.classList.remove('hidden');
+      resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (err) {
+      loader.classList.add('hidden');
+      showMessage("Analysis failed: " + err.message, true);
+      console.error(err);
+    }
+  }
+
+  function populateResultCard(data) {
+    breedNameEl.textContent = data.predicted_breed || "Unknown";
+    confidenceEl.textContent = data.confidence || "N/A";
+    familyEl.textContent = data.family || "";
+    aiSummaryEl.textContent = data.details?.ai_summary || "No summary available.";
+    managementTipEl.textContent = data.details?.management_tip || "No management tips.";
+
+    topMatchesEl.innerHTML = '';
+    (data.top_3_matches || []).forEach(match => {
+      const pill = document.createElement('span');
+      pill.className = 'pill inline-block text-sm font-medium mr-2 mb-2 px-3 py-1 rounded-full';
+      pill.textContent = `${match.breed} (${match.confidence})`;
+      topMatchesEl.appendChild(pill);
+    });
+  }
+
+  function copySummary() {
+    if (!lastAnalysisData) return;
+    const t = `
+Breed: ${lastAnalysisData.predicted_breed}
+Confidence: ${lastAnalysisData.confidence}
+Family: ${lastAnalysisData.family}
+Summary: ${lastAnalysisData.details?.ai_summary || ""}
+Tip: ${lastAnalysisData.details?.management_tip || ""}
+    `.trim();
+    navigator.clipboard.writeText(t).then(() => showMessage("Summary copied!"), () => showMessage("Copy failed.", true));
+  }
+
+  function downloadJSON() {
+    if (!lastAnalysisData) return;
+    const blob = new Blob([JSON.stringify(lastAnalysisData, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'pashu_drishti_result.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function showMessage(msg, error = false) {
+    messageBox.textContent = msg;
+    messageBox.style.backgroundColor = error ? '#DC2626' : '';
+    messageBox.style.color = error ? 'white' : '';
+    setTimeout(() => messageBox.classList.replace('opacity-0', 'opacity-100'), 10);
+    setTimeout(() => messageBox.classList.replace('opacity-100', 'opacity-0'), 3000);
+  }
+});
+</script>
+
+</body>
+</html>

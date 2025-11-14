@@ -1,0 +1,25 @@
+# Core runtime
+fastapi==0.95.2
+uvicorn[standard]==0.23.2
+python-multipart==0.0.6
+
+# Vision & model
+pillow==10.0.0
+numpy==1.26.4
+
+# Ultralytics / YOLO (if you still use it elsewhere)
+#ultralytics==8.3.225
+
+# PyTorch + torchvision + timm
+# NOTE: leave these unpinned if you want pip to pick the best wheel for the platform.
+# If you hit compatibility issues, we can pin exact working versions later.
+torch
+torchvision
+timm
+
+# Networking / utils
+requests==2.31.0
+python-dotenv==1.0.0
+
+# Google GenAI SDK - pin to the latest available on PyPI per your build log
+google-generativeai==0.8.5
